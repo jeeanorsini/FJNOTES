@@ -151,16 +151,17 @@
       background: var(--accent);
       transition: width 0.3s;
     }
+    /* Correção aplicada: atualização na estilização das ações da tarefa */
     .tarefa-actions {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.3rem;
       margin-top: 0.5rem;
+      flex-wrap: wrap;
     }
     .tarefa-actions button {
-      padding: 0.3rem 0.6rem;
-      font-size: 0.8rem;
-      background: transparent;
-      border: 1px solid #444;
+      padding: 0.3rem 0.5rem;
+      font-size: 0.75rem;
+      white-space: nowrap;
     }
 
     /* Toast */
@@ -202,6 +203,20 @@
       max-height: 80vh;
       overflow-y: auto;
     }
+    /* Correção aplicada: estilos para cabeçalho do modal e botão de fechar */
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text);
+    }
   </style>
 </head>
 <body>
@@ -225,7 +240,7 @@
 <!-- Modal de Comentários -->
 <div class="modal" id="commentModal">
   <div class="modal-content">
-    <h3>Comentários</h3>
+    <!-- O cabeçalho será injetado via JS -->
     <div id="commentsList"></div>
     <textarea id="newComment" placeholder="Adicione um comentário..." style="width: 100%; margin: 1rem 0;"></textarea>
     <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
@@ -545,7 +560,7 @@
     showToast(`Coluna "${column.title}" removida!`);
   }
 
-  // Adicionar tarefa à coluna
+  // Adicionar tarefa à coluna (CORREÇÃO APLICADA)
   function addTaskToColumn(columnId) {
     const title = prompt('Título da tarefa:', 'Nova Tarefa');
     if (!title) return;
@@ -553,13 +568,21 @@
     const column = state.columns.find(col => col.id == columnId);
     if (!column) return;
     
-    const dueDate = prompt('Data de vencimento (YYYY-MM-DD):', '');
+    // Solicita a data no formato DD/MM/AAAA e formata para ISO
+    const dueDateInput = prompt('Data de vencimento (DD/MM/AAAA):', '');
+    let formattedDate = '';
+    if (dueDateInput) {
+      const [day, month, year] = dueDateInput.split('/');
+      if (day && month && year) {
+        formattedDate = new Date(`${year}-${month}-${day}`).toISOString();
+      }
+    }
     
     column.tasks.push({
       id: Date.now(),
       title,
       priority: 'Medium',
-      dueDate,
+      dueDate: formattedDate,
       progress: 0,
       comments: []
     });
@@ -602,24 +625,44 @@
     renderBoard();
   }
 
-  // Abrir modal de comentários
+  // Abrir modal de comentários (CORREÇÃO APLICADA)
   function openCommentModal(task, columnId) {
     state.currentTask = { task, columnId };
     
-    DOM.commentsList.innerHTML = '';
+    // Injetar cabeçalho do modal com o número de comentários e botão de fechar
+    DOM.commentsList.innerHTML = `
+      <div class="modal-header">
+        <h3>Comentários (${(task.comments || []).length})</h3>
+        <button class="close-modal" onclick="DOM.commentModal.style.display='none'">×</button>
+      </div>
+    `;
+    
+    const commentsContainer = document.createElement('div');
     (task.comments || []).forEach(comment => {
       const commentEl = document.createElement('div');
       commentEl.style.marginBottom = '1rem';
       commentEl.innerHTML = `
-        <strong>${comment.author}</strong>
-        <small style="color: #aaa;">${new Date(comment.date).toLocaleString()}</small>
-        <p>${comment.text}</p>
+        <div style="display:flex; justify-content:space-between;">
+          <strong>${comment.author}</strong>
+          <small style="color: #aaa;">${formatDate(comment.date)}</small>
+        </div>
+        <p style="margin-top:0.5rem;">${comment.text}</p>
       `;
-      DOM.commentsList.appendChild(commentEl);
+      commentsContainer.appendChild(commentEl);
     });
     
+    DOM.commentsList.appendChild(commentsContainer);
     DOM.newComment.value = '';
     DOM.commentModal.style.display = 'flex';
+  }
+
+  // Função auxiliar para formatar data (CORREÇÃO APLICADA)
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 
   // Salvar comentário

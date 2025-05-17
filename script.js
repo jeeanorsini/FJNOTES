@@ -203,4 +203,279 @@ function createTaskElement(task, columnId) {
 // Configurar drag and drop
 function setupDragAndDrop() {
     const tasks = document.querySelectorAll('.tarefa');
-    const columns = document.querySelectorAll('.
+    const columns = document.querySelectorAll('.coluna');
+
+    tasks.forEach(task => {
+        task.addEventListener('dragstart', (e) => {
+            task.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', JSON.stringify({
+                taskId: task.dataset.taskId,
+                fromColumnId: task.dataset.columnId
+            }));
+        });
+
+        task.addEventListener('dragend', () => {
+            task.classList.remove('dragging');
+        });
+    });
+
+    columns.forEach(column => {
+        column.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const draggingTask = document.querySelector('.dragging');
+            if (draggingTask) {
+                const afterElement = getDragAfterElement(column, e.clientY);
+                if (afterElement) {
+                    column.insertBefore(draggingTask, afterElement);
+                } else {
+                    column.appendChild(draggingTask);
+                }
+            }
+        });
+
+        column.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+            const toColumnId = column.dataset.columnId;
+
+            moveTask(data.taskId, data.fromColumnId, toColumnId);
+        });
+    });
+}
+
+// Helper para posicionamento durante drag
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.tarefa:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// Mover tarefa entre colunas
+function moveTask(taskId, fromColumnId, toColumnId) {
+    if (fromColumnId === toColumnId) return;
+
+    const fromColumn = state.columns.find(col => col.id == fromColumnId);
+    const toColumn = state.columns.find(col => col.id == toColumnId);
+
+    if (!fromColumn || !toColumn) return;
+
+    const taskIndex = fromColumn.tasks.findIndex(task => task.id == taskId);
+    if (taskIndex === -1) return;
+
+    const task = fromColumn.tasks.splice(taskIndex, 1)[0];
+    toColumn.tasks.push(task);
+
+    saveState();
+    renderBoard();
+}
+
+// Adicionar nova coluna
+function addNewColumn() {
+    const title = prompt('Nome da nova coluna:', 'Nova Coluna');
+    if (!title) return;
+
+    state.columns.push({
+        id: Date.now(),
+        title,
+        tasks: []
+    });
+
+    saveState();
+    renderBoard();
+    showToast(`Coluna "${title}" adicionada!`);
+}
+
+// Remover coluna
+function deleteColumn(columnId) {
+    if (!confirm('Tem certeza que deseja remover esta coluna e todas as suas tarefas?')) return;
+
+    const column = state.columns.find(col => col.id == columnId);
+    if (!column) return;
+
+    state.columns = state.columns.filter(col => col.id != columnId);
+    saveState();
+    renderBoard();
+    showToast(`Coluna "${column.title}" removida!`);
+}
+
+// Adicionar tarefa à coluna (CORREÇÃO APLICADA)
+function addTaskToColumn(columnId) {
+    const title = prompt('Título da tarefa:', 'Nova Tarefa');
+    if (!title) return;
+
+    const column = state.columns.find(col => col.id == columnId);
+    if (!column) return;
+
+    // Solicita a data no formato DD/MM/AAAA e formata para ISO
+    const dueDateInput = prompt('Data de vencimento (DD/MM/AAAA):', '');
+    let formattedDate = '';
+    if (dueDateInput) {
+        const [day, month, year] = dueDateInput.split('/');
+        if (day && month && year) {
+            formattedDate = new Date(`${year}-${month}-${day}`).toISOString();
+        }
+    }
+
+    column.tasks.push({
+        id: Date.now(),
+        title,
+        priority: 'Medium',
+        dueDate: formattedDate,
+        progress: 0,
+        comments: []
+    });
+
+    saveState();
+    renderBoard();
+    showToast(`Tarefa "${title}" adicionada!`);
+}
+
+// Atualizar progresso da tarefa
+function updateTaskProgress(taskId, columnId) {
+    const column = state.columns.find(col => col.id == columnId);
+    if (!column) return;
+
+    const task = column.tasks.find(t => t.id == taskId);
+    if (!task) return;
+
+    const newProgress = prompt('Progresso (0-100):', task.progress);
+    if (!newProgress || isNaN(newProgress)) return;
+
+    task.progress = Math.min(100, Math.max(0, parseInt(newProgress)));
+    saveState();
+    renderBoard();
+}
+
+// Atualizar prioridade da tarefa
+function updateTaskPriority(taskId, columnId) {
+    const column = state.columns.find(col => col.id == columnId);
+    if (!column) return;
+
+    const task = column.tasks.find(t => t.id == taskId);
+    if (!task) return;
+
+    const priorities = ['High', 'Medium', 'Low'];
+    const currentIndex = priorities.indexOf(task.priority);
+    const nextIndex = (currentIndex + 1) % priorities.length;
+
+    task.priority = priorities[nextIndex];
+    saveState();
+    renderBoard();
+}
+
+// Abrir modal de comentários (CORREÇÃO APLICADA)
+function openCommentModal(task, columnId) {
+    state.currentTask = { task, columnId };
+
+    // Injetar cabeçalho do modal com o número de comentários e botão de fechar
+    DOM.commentsList.innerHTML = `
+        <div class="modal-header">
+            <h3>Comentários (${(task.comments || []).length})</h3>
+            <button class="close-modal" onclick="DOM.commentModal.style.display='none'">×</button>
+        </div>
+    `;
+
+    const commentsContainer = document.createElement('div');
+    (task.comments || []).forEach(comment => {
+        const commentEl = document.createElement('div');
+        commentEl.style.marginBottom = '1rem';
+        commentEl.innerHTML = `
+            <div style="display:flex; justify-content:space-between;">
+                <strong>${comment.author}</strong>
+                <small style="color: #aaa;">${formatDate(comment.date)}</small>
+            </div>
+            <p style="margin-top:0.5rem;">${comment.text}</p>
+        `;
+        commentsContainer.appendChild(commentEl);
+    });
+
+    DOM.commentsList.appendChild(commentsContainer);
+    DOM.newComment.value = '';
+    DOM.commentModal.style.display = 'flex';
+}
+
+// Função auxiliar para formatar data (CORREÇÃO APLICADA)
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// Salvar comentário
+function saveComment() {
+    const text = DOM.newComment.value.trim();
+    if (!text) return;
+
+    const { task, columnId } = state.currentTask;
+    const column = state.columns.find(col => col.id == columnId);
+    if (!column) return;
+
+    const taskInColumn = column.tasks.find(t => t.id == task.id);
+    if (!taskInColumn) return;
+
+    if (!taskInColumn.comments) taskInColumn.comments = [];
+
+    taskInColumn.comments.push({
+        author: prompt('Seu nome:', 'Usuário') || 'Anônimo',
+        text,
+        date: new Date().toISOString()
+    });
+
+    saveState();
+    openCommentModal(taskInColumn, columnId);
+    showToast('Comentário adicionado!');
+}
+
+// Deletar tarefa
+function deleteTask(taskId, columnId) {
+    if (!confirm('Tem certeza que deseja remover esta tarefa?')) return;
+
+    const column = state.columns.find(col => col.id == columnId);
+    if (!column) return;
+
+    const taskIndex = column.tasks.findIndex(t => t.id == taskId);
+    if (taskIndex === -1) return;
+
+    const task = column.tasks[taskIndex];
+    column.tasks.splice(taskIndex, 1);
+
+    saveState();
+    renderBoard();
+    showToast(`Tarefa "${task.title}" removida!`);
+}
+
+// Undo/Redo
+function undo() {
+    if (state.historyIndex <= 0) return;
+
+    state.historyIndex--;
+    state.columns = JSON.parse(state.history[state.historyIndex]);
+    localStorage.setItem('fjnotes-state', JSON.stringify(state));
+    renderBoard();
+    updateUndoRedoButtons();
+}
+
+function redo() {
+    if (state.historyIndex >= state.history.length - 1) return;
+
+    state.historyIndex++;
+    state.columns = JSON.parse(state.history[state.historyIndex]);
+    localStorage.setItem('fjnotes-state', JSON.stringify(state));
+    renderBoard();
+    updateUndoRedoButtons();
+}
+
+function updateUndoRedoButtons() {
+    DOM.btnUndo.disabled = state.historyIndex <= 0;
+    DOM.btnRedo.disabled = state.historyIndex >= state.history.length -

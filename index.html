@@ -3,23 +3,24 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>FJNOTES Pro Avançado</title>
-<!-- Styles copiados e ajustados para melhor visual e funcionalidade -->
+<title>FJNOTES Pro - Sem Mapa Mental</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
-  /* Reset e base */
-  * { box-sizing: border-box; }
-  body {
+  * {
+    box-sizing: border-box;
+  }
+  html, body {
     margin: 0; padding: 0;
     font-family: 'Montserrat', sans-serif;
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-  body.dark {
-    background-color: #121212; color: #FFC107;
+    height: 100%;
+    background-color: #121212;
+    color: #FFC107;
+    overflow-y: auto;
   }
   body.light {
-    background-color: #fdf6e3; color: #b58900;
+    background-color: #fdf6e3;
+    color: #b58900;
   }
 
   header {
@@ -31,6 +32,9 @@
     padding: 1rem 2rem;
     background-color: inherit;
     border-bottom: 2px solid currentColor;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
   }
   h1 {
     margin: 0; font-weight: 700; font-size: 1.8rem;
@@ -53,16 +57,43 @@
     transition: background-color 0.25s ease, color 0.25s ease;
     user-select: none;
   }
-  button:hover {
-    background-color: currentColor;
-    color: var(--button-hover-text, #121212);
+  button:hover:not(:disabled) {
+    background-color: #ffc107;
+    color: #121212;
+  }
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  #searchInput {
+    padding: 0.4rem 0.8rem;
+    border-radius: 12px;
+    border: none;
+    background-color: #222;
+    color: #ffc107;
+    font-size: 1rem;
+    outline: none;
+    min-width: 210px;
+    transition: background-color 0.25s ease;
+  }
+  body.light #searchInput {
+    background-color: #eee8d5;
+    color: #b58900;
+  }
+  #searchInput::placeholder {
+    color: #deb639;
+  }
+  #searchInput:focus {
+    background-color: #ffc107dd;
+    color: #121212;
   }
   main {
     display: flex;
     padding: 1rem 2rem;
     gap: 1rem;
-    height: calc(100vh - 80px);
+    min-height: calc(90vh - 70px);
     box-sizing: border-box;
+    overflow-y: auto;
   }
   /* Colunas */
   #telaPrincipal {
@@ -73,7 +104,8 @@
     background-color: var(--panel-bg);
     border-radius: 12px;
     padding: 1rem;
-    max-height: 100%;
+    max-height: 90vh;
+    box-sizing: border-box;
   }
   body.dark #telaPrincipal {
     --panel-bg: #1e1e1e;
@@ -92,6 +124,8 @@
     padding: 1rem;
     display: flex;
     flex-direction: column;
+    max-height: 90vh;
+    overflow-y: auto;
   }
   body.dark .coluna {
     --col-bg: #2a2a2a;
@@ -104,6 +138,7 @@
     font-weight: 900;
     letter-spacing: 1px;
     font-size: 1.3rem;
+    user-select: text;
   }
   .btn-primary {
     background-color: #ffc107;
@@ -115,6 +150,7 @@
     font-weight: 900;
     font-size: 1rem;
     margin-bottom: 1rem;
+    transition: background-color 0.3s ease;
   }
   .btn-primary:hover {
     background-color: #ffca28cc;
@@ -152,93 +188,7 @@
     resize: vertical;
     color: inherit;
   }
-  /* Mapa Mental */
-  #mapaContainer {
-    position: relative;
-    background-color: var(--map-bg);
-    border-radius: 12px;
-    border: 2px solid currentColor;
-    flex: 1;
-    overflow: hidden;
-    max-height: 100%;
-    cursor: grab;
-  }
-  body.dark #mapaContainer {
-    --map-bg: #1e1e1e;
-  }
-  body.light #mapaContainer {
-    --map-bg: #fff8dc;
-    color: #b58900;
-  }
-  #svgConexoes {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    pointer-events: none;
-    stroke-width: 2.5;
-    fill: none;
-    z-index: 0;
-  }
-  #mapaMental {
-    position: relative;
-    min-height: 100%;
-    width: 100%;
-    overflow: visible;
-    touch-action: none;
-  }
-  .topico {
-    position: absolute;
-    background-color: var(--topico-bg);
-    border-radius: 12px;
-    padding: 12px 16px;
-    min-width: 160px;
-    max-width: 250px;
-    border: 2px solid currentColor;
-    box-shadow: 0 0 10px #ffc10755;
-    font-weight: 700;
-    font-size: 1.1rem;
-    word-break: break-word;
-    cursor: grab;
-    user-select: text;
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-  }
-  body.dark .topico {
-    --topico-bg: #222;
-  }
-  body.light .topico {
-    --topico-bg: #ffe082;
-  }
-  .topico:hover {
-    box-shadow: 0 0 25px #ffca2855;
-    transform: scale(1.05);
-    z-index: 100;
-  }
-  .topico input {
-    all: unset;
-    width: 100%;
-    font-weight: 700;
-    font-size: 1rem;
-    background-color: transparent;
-    color: inherit;
-    outline: none;
-    font-family: 'Montserrat', sans-serif;
-    text-align: center;
-  }
-  /* Botões de conexão e ações */
-  .conexaoBtn {
-    margin-top: 6px;
-    padding: 6px 12px;
-    font-size: 0.9rem;
-    border: 1px solid currentColor;
-    border-radius: 8px;
-    background: transparent;
-    cursor: pointer;
-  }
-  /* Seleção */
-  .selecionado {
-    outline: 3px solid #fff176;
-    box-shadow: 0 0 20px #fff176;
-    z-index: 101 !important;
-  }
+  /* Modo mapa mental removido */
 
   /* Toast */
   #toast {
@@ -263,7 +213,7 @@
   }
 </style>
 </head>
-<body class="dark">
+<body class="">
 <header>
   <h1>FJNOTES Pro</h1>
   <input type="search" id="searchInput" placeholder="Buscar cartões ou tópicos..." oninput="filtrarConteudo()" />
@@ -273,26 +223,19 @@
     <button onclick="toggleTema()" title="Alternar tema claro/escuro">🌓 Tema</button>
   </div>
 </header>
+
 <main>
   <div id="telaPrincipal" aria-label="Quadro de colunas" role="region"></div>
-  <div id="mapaContainer" aria-label="Mapa mental" style="display:none;" role="region">
-    <svg id="svgConexoes" preserveAspectRatio="none"></svg>
-    <div id="mapaMental"></div>
-  </div>
 </main>
 
-<div id="botoesBarras" role="toolbar" aria-label="Ferramentas" style="margin:1rem; display:flex; gap:0.5rem; justify-content:center;">
+<div id="botoesBarras" role="toolbar" style="margin:1rem; display:flex; gap:0.5rem; justify-content:center;">
   <button onclick="adicionarColuna()">Adicionar Coluna</button>
   <button onclick="mostrarTabuleiro()">Mostrar Quadro</button>
-  <button onclick="mostrarMapaMental()">Mostrar Mapa Mental</button>
   <button onclick="exportarDados()">Exportar Dados</button>
   <button onclick="mostrarImportar()">Importar Dados</button>
-  <button onclick="selecionarParaConectar()">Selecionar Tópicos</button>
-  <button onclick="conectarSelecionados()">Conectar Selecionados</button>
-  <button onclick="limparSelecao()">Limpar Seleção</button>
-  <button onclick="criarTopico()">Adicionar Tópico</button>
-  <button onclick="limparMapa()">Limpar Mapa</button>
+  <button onclick="limparTudo()">Limpar Tudo</button>
 </div>
+
 <input type="file" id="arquivoImportar" style="display:none" onchange="importarDados(event)" />
 
 <div id="toast"></div>
@@ -300,8 +243,7 @@
 <script>
   // Variáveis principais
   let colunas = [];
-  let mapaMental = [];
-  let modoMapa = false;
+  let modoMapa = false; // modo mapa mental removido, mas mantido por compatibilidade
   let selecao = [];
 
   let historico = [];
@@ -316,15 +258,15 @@
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 
-  // Gerenciamento de histórico (Undo/Redo)
   function salvarEstado() {
     if(indexHistorico < historico.length -1) {
       historico.splice(indexHistorico+1);
     }
-    const snapshot = JSON.stringify({colunas, mapaMental});
+    const snapshot = JSON.stringify({colunas});
     historico.push(snapshot);
     if(historico.length > MAX_HIST) {
       historico.shift();
+      if(indexHistorico>0)indexHistorico--;
     } else {
       indexHistorico++;
     }
@@ -349,21 +291,18 @@
       if(snap) {
         const estado = JSON.parse(snap);
         colunas = estado.colunas || [];
-        mapaMental = estado.mapaMental || [];
         selecao = [];
         renderizarColunas();
-        renderizarMapaMental();
-        salvarDadosLocal();
         toast('Ações restauradas');
         atualizarBotoesUndoRedo();
       }
     } catch {
-      toast('Erro ao restaurar estado');
+      toast('Erro ao restaurar');
     }
   }
   function atualizarBotoesUndoRedo() {
     document.getElementById('btnUndo').disabled = indexHistorico <= 0;
-    document.getElementById('btnRedo').disabled = indexHistorico >= historico.length-1 || indexHistorico < 0;
+    document.getElementById('btnRedo').disabled = indexHistorico >= historico.length-1 || indexHistorico<0;
   }
   function undoEstado() { desfazer(); }
   function redoEstado() { refazer(); }
@@ -382,7 +321,7 @@
 
   // Persistência local
   function salvarDadosLocal() {
-    localStorage.setItem('dadosGerenciador', JSON.stringify({colunas, mapaMental}));
+    localStorage.setItem('dadosGerenciador', JSON.stringify({colunas}));
   }
   function carregarDadosLocal() {
     const dados = localStorage.getItem('dadosGerenciador');
@@ -390,10 +329,8 @@
       try {
         const obj = JSON.parse(dados);
         colunas = obj.colunas || [];
-        mapaMental = obj.mapaMental || [];
       } catch {
         colunas = [];
-        mapaMental = [];
       }
     }
   }
@@ -484,7 +421,6 @@
           }
         };
         cartaoDiv.appendChild(btnAddTag);
-
         // Botão excluir cartão
         const btnExcluir = document.createElement('button');
         btnExcluir.textContent = '×';
@@ -498,8 +434,7 @@
           }
         };
         cartaoDiv.appendChild(btnExcluir);
-
-        // Drag & drop
+        // Drag & Drop na coluna
         colDiv.ondragover = e => e.preventDefault();
         colDiv.ondrop = e => {
           const data = JSON.parse(e.dataTransfer.getData('cartao'));
@@ -511,276 +446,38 @@
             renderizarColunas();
           }
         };
-
-        // Adicionar ao container
+        // Adiciona cartão na coluna
         container.appendChild(colDiv);
         colDiv.appendChild(cartaoDiv);
       });
     });
   }
 
-  // ==== Mapa mental ====
-  // Cria novo tópico
-  function criarTopico() {
-    const texto = prompt('Texto do tópico:', 'Novo tópico');
-    if(!texto) return;
-    const novoTopo = {
-      id: Date.now(),
-      texto,
-      conexoes: [],
-      pos: { x: 200 + Math.random()*300, y: 150 + Math.random()*250 },
-      tags: []
-    };
-    mapaMental.push(novoTopo);
-    salvarEstado();
-    renderizarMapaMental();
-  }
-
-  // Limpa mapa
-  function limparMapa() {
-    if(confirm('Deseja limpar o mapa mental?')){
-      mapaMental = [];
-      salvarEstado();
-      renderizarMapaMental();
-    }
-  }
-
-  // Variáveis para drag
-  let dragTopo = null;
-  let offsetX = 0;
-  let offsetY = 0;
-
-  // Renderiza mapa mental
-  function renderizarMapaMental() {
-    const container = document.getElementById('mapaMental');
-    const svg = document.getElementById('svgConexoes');
-    container.innerHTML = '';
-    svg.innerHTML = '';
-
-    // Renderiza tópicos
-    mapaMental.forEach(tp => {
-      const el = document.createElement('div');
-      el.className = 'topico';
-      el.setAttribute('data-id', tp.id);
-      el.style.left = tp.pos.x + 'px';
-      el.style.top = tp.pos.y + 'px';
-      el.style.transform = `scale(${zoomLevel})`;
-      if(selecao.includes(tp.id)) el.classList.add('selecionado');
-
-      // Texto editável
-      const input = document.createElement('input');
-      input.value = tp.texto;
-      input.oninput = () => {
-        tp.texto = input.value;
-        salvarEstado();
-      };
-      el.appendChild(input);
-
-      // Tags
-      (tp.tags || []).forEach(t => {
-        const span = document.createElement('span');
-        span.className = 'tag';
-        span.textContent = t;
-        span.title = 'Clique para remover tag';
-        span.onclick = () => {
-          tp.tags = tp.tags.filter(tag => tag !== t);
-          salvarEstado();
-          renderizarMapaMental();
-        };
-        el.appendChild(span);
+  // ==== Funções de controle de filtro, exportar/importar, limpar ====
+  function filtrarConteudo() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    // Colunas e cartões
+    document.querySelectorAll('#telaPrincipal > .coluna').forEach(colEl => {
+      const colId = +colEl.getAttribute('data-id');
+      const col = colunas.find(c => c.id===colId);
+      const colMatch = col.nome.toLowerCase().includes(q);
+      let hasVisivel = false;
+      colEl.querySelectorAll('.cartao').forEach(cartEl => {
+        const i = +cartEl.getAttribute('data-index');
+        const cart = col.cartoes[i];
+        const txt = cart.texto.toLowerCase();
+        const tagsStr = (cart.tags ||[]).join(',').toLowerCase();
+        const show = colMatch || txt.includes(q) || tagsStr.includes(q);
+        cartEl.style.display = show ? '' : 'none';
+        if(show) hasVisivel = true;
       });
-
-      // Botão add tag
-      const btnAddTag = document.createElement('button');
-      btnAddTag.textContent = '+Tag';
-      btnAddTag.onclick = e => {
-        e.stopPropagation();
-        const tNome = prompt('Nome da tag:');
-        if(tNome && !tp.tags.includes(tNome.trim())) {
-          tp.tags = tp.tags || [];
-          tp.tags.push(tNome.trim());
-          salvarEstado();
-          renderizarMapaMental();
-        }
-      };
-      el.appendChild(btnAddTag);
-
-      // Botão conectar (selecionar)
-      const btnConectar = document.createElement('button');
-      btnConectar.textContent = selecao.includes(tp.id) ? 'Selecionado' : 'Selecionar';
-      btnConectar.className = 'conexaoBtn';
-      btnConectar.onclick = () => {
-        if(!selecao.includes(tp.id)){
-          selecao.push(tp.id);
-        } else {
-          // apenas para visual, pode tirar
-        }
-        renderizarMapaMental();
-      };
-      el.appendChild(btnConectar);
-
-      // Botão remover conexões
-      const btnRemCon = document.createElement('button');
-      btnRemCon.textContent = 'Remover Conexões';
-      btnRemCon.className = 'conexaoBtn';
-      btnRemCon.onclick = () => {
-        if(selecao.length >= 2) {
-          selecao.forEach(id => {
-            const t = mapaMental.find(t => t.id===id);
-            if(t) {
-              t.conexoes = t.conexoes.filter(c => !selecao.includes(c));
-            }
-          });
-          salvarEstado();
-          renderizarMapaMental();
-        } else {
-          toast('Selecione pelo menos dois tópicos');
-        }
-      };
-      el.appendChild(btnRemCon);
-
-      // Botão excluir tópico
-      const btnExcluir = document.createElement('button');
-      btnExcluir.textContent = 'Excluir';
-      btnExcluir.onclick = () => {
-        if(confirm('Excluir tópico e conexões?')){
-          // remove conexões
-          mapaMental.forEach(t => {
-            t.conexoes = t.conexoes.filter(c => c !== tp.id);
-          });
-          // remove tópico
-          mapaMental = mapaMental.filter(t => t.id !== tp.id);
-          selecao = selecao.filter(id => id !== tp.id);
-          salvarEstado();
-          renderizarMapaMental();
-        }
-      };
-      el.appendChild(btnExcluir);
-
-      // Drag & drop tópicos
-      el.onmousedown = e => {
-        dragTopo = tp;
-        const rect = document.getElementById('mapaContainer').getBoundingClientRect();
-        offsetX = e.clientX - rect.left - tp.pos.x;
-        offsetY = e.clientY - rect.top - tp.pos.y;
-        e.stopPropagation();
-        e.preventDefault();
-      };
-
-      container.appendChild(el);
-    });
-
-    // Desenhar conexões
-    mapaMental.forEach(tp => {
-      const fromX = tp.pos.x + 80;
-      const fromY = tp.pos.y + 25;
-      tp.conexoes.forEach(destId => {
-        const dest = mapaMental.find(t => t.id===destId);
-        if(dest){
-          const toX = dest.pos.x + 80;
-          const toY = dest.pos.y + 25;
-          const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-          const midX = (fromX + toX)/2;
-          const midY = (fromY + toY)/2 + (fromY < toY ? -50 : 50);
-          path.setAttribute('d', `M${fromX},${fromY} L${midX},${midY} L${toX},${toY}`);
-          path.setAttribute('stroke','#FFC107');
-          path.setAttribute('stroke-width',2.5);
-          svg.appendChild(path);
-        }
-      });
+      colEl.style.display = (colMatch || hasVisivel) ? '' : 'none';
     });
   }
 
-  // Eventos globais para arraste tópicos
-  document.body.onmousemove = e => {
-    if(dragTopo){
-      const rect = document.getElementById('mapaContainer').getBoundingClientRect();
-      let x = (e.clientX - rect.left - offsetX);
-      let y = (e.clientY - rect.top - offsetY);
-      // Limites
-      x = Math.max(0, Math.min(rect.width - 160, x));
-      y = Math.max(0, Math.min(rect.height - 50, y));
-      dragTopo.pos.x = x;
-      dragTopo.pos.y = y;
-      salvarEstado();
-      renderizarMapaMental();
-    }
-  };
-  document.body.onmouseup = () => {
-    dragTopo = null;
-  };
-
-  // Zoom e pan
-  let zoomLevel = 1;
-  let panX = 0;
-  let panY = 0;
-  let isPanning = false;
-  let startPan = {x:0, y:0};
-  let panStart = {x:0, y:0};
-
-  document.getElementById('mapaContainer').addEventListener('wheel', e => {
-    e.preventDefault();
-    zoomLevel += -e.deltaY * 0.0015;
-    zoomLevel = Math.min(Math.max(0.5, zoomLevel), 3);
-    renderizarMapaMental();
-  }, {passive: false});
-
-  document.getElementById('mapaContainer').addEventListener('mousedown', e => {
-    if(e.target.id === 'mapaContainer' || e.target.id==='svgConexoes'){
-      isPanning = true;
-      startPan.x = e.clientX;
-      startPan.y = e.clientY;
-      panStart.x = panX;
-      panStart.y = panY;
-      document.getElementById('mapaContainer').style.cursor='grabbing';
-    }
-  });
-  document.body.addEventListener('mouseup', () => {
-    isPanning = false;
-    document.getElementById('mapaContainer').style.cursor='grab';
-  });
-  document.body.addEventListener('mousemove', e => {
-    if(isPanning){
-      panX = panStart.x + (e.clientX - startPan.x);
-      panY = panStart.y + (e.clientY - startPan.y);
-      document.getElementById('mapaMental').style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
-    }
-  });
-
-  // Seleção múltipla
-  function limparSelecao() {
-    selecao = [];
-    renderizarMapaMental();
-    toast('Seleção limpa');
-  }
-
-  function selecionarParaConectar() {
-    toast('Clique nos tópicos para selecionar, depois Conectar');
-  }
-
-  function conectarSelecionados() {
-    if(selecao.length<2){
-      toast('Selecione pelo menos dois tópicos');
-      return;
-    }
-    selecao.forEach(id1 => {
-      const t1 = mapaMental.find(t => t.id===id1);
-      selecao.forEach(id2 => {
-        if(id1!==id2 && !t1.conexoes.includes(id2)){
-          t1.conexoes.push(id2);
-        }
-      });
-    });
-    salvarEstado();
-    limparSelecao();
-    renderizarMapaMental();
-  }
-
-  // Exportar/Importar
   function exportarDados() {
-    const dados = { colunas, mapaMental };
-    const jsonStr = JSON.stringify(dados, null, 2);
-    const blob = new Blob([jsonStr], {type:'application/json'});
+    const dados = { colunas };
+    const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -789,11 +486,9 @@
     URL.revokeObjectURL(url);
     toast('Dados exportados');
   }
-
   function mostrarImportar() {
     document.getElementById('arquivoImportar').click();
   }
-
   function importarDados(e) {
     const file = e.target.files[0];
     if(!file) return;
@@ -802,12 +497,10 @@
       try {
         const dados = JSON.parse(reader.result);
         colunas = dados.colunas || [];
-        mapaMental = dados.mapaMental || [];
         salvarEstado();
         renderizarColunas();
-        renderizarMapaMental();
-        mostrarTabuleiro();
         toast('Dados importados');
+        mostrarTabuleiro();
       } catch {
         toast('Erro ao importar');
       }
@@ -815,50 +508,20 @@
     reader.readAsText(file);
   }
 
-  // Buscar
-  function filtrarConteudo() {
-    const q = document.getElementById('searchInput').value.toLowerCase();
-    // Colunas e cartões
-    colunas.forEach(c => {
-      const colDiv = [...document.querySelectorAll('#telaPrincipal > div')].find(d => +d.getAttribute('data-id')===c.id);
-      if(!colDiv) return;
-      const colMatch = c.nome.toLowerCase().includes(q);
-      let hasCartoesVisiveis = false;
-      colDiv.querySelectorAll('.cartao').forEach((el, i) => {
-        const cart = c.cartoes[i];
-        const txt = cart.texto.toLowerCase();
-        const tags = (cart.tags||[]).join(',').toLowerCase();
-        const visivel = txt.includes(q) || colMatch || tags.includes(q);
-        el.style.display = visivel ? '' : 'none';
-        if(visivel) hasCartoesVisiveis = true;
-      });
-      colDiv.style.display = (colMatch || hasCartoesVisiveis) ? '' : 'none';
-    });
-    // Mapas
-    mapaMental.forEach(t => {
-      const el = [...document.querySelectorAll('#mapaMental > div')].find(d=>+d.getAttribute('data-id')===t.id);
-      if(!el) return;
-      const txt = t.texto.toLowerCase();
-      const tags = (t.tags||[]).join(',').toLowerCase();
-      const visivel = txt.includes(q) || tags.includes(q);
-      el.style.display = visivel ? '' : 'none';
-    });
+  // Limpar tudo
+  function limparTudo() {
+    if(confirm('Deseja apagar tudo?')){
+      colunas = [];
+      salvarEstado();
+      renderizarColunas();
+    }
   }
 
-  // Mostrar modos
+  // Mostrar modo quadro
   function mostrarTabuleiro() {
-    modoMapa = false;
     document.getElementById('telaPrincipal').style.display='flex';
-    document.getElementById('mapaContainer').style.display='none';
   }
-  function mostrarMapaMental() {
-    modoMapa = true;
-    document.getElementById('telaPrincipal').style.display='none';
-    document.getElementById('mapaContainer').style.display='block';
-    renderizarMapaMental();
-  }
-
-  // Iniciar
+  // Inicializa
   renderizarColunas();
   mostrarTabuleiro();
   salvarEstado();

@@ -1,785 +1,338 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FJNOTES - Gerenciador Visual (ClickUp-like)</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap');
-    :root {
-      --dark-bg: #121212;
-      --dark-card: #1e1e1e;
-      --accent: #FFC107;
-      --text: #e0e0e0;
-      --high-prio: #ff5252;
-      --medium-prio: #ffd740;
-      --low-prio: #69f0ae;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Montserrat', sans-serif;
-      background: var(--dark-bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem 2rem;
-      background: var(--dark-card);
-      border-bottom: 2px solid var(--accent);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    h1 { font-size: 1.8rem; color: var(--accent); }
-    #searchInput {
-      padding: 0.6rem 1rem;
-      border-radius: 8px;
-      border: none;
-      background: #333;
-      color: var(--text);
-      width: 300px;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Projeto Tarefas Melhorado</title>
+<style>
+  /* Reset básico */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0; padding: 0;
+    background-color: var(--bg);
+    color: var(--text);
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  :root {
+    --bg-light: #f4f4f4;
+    --text-light: #222;
+    --bg-dark: #121212;
+    --text-dark: #eee;
+    --primary: #ffcc00;
+  }
+
+  /* Tema claro padrão */
+  body[data-theme="light"] {
+    --bg: var(--bg-light);
+    --text: var(--text-light);
+  }
+  /* Tema escuro */
+  body[data-theme="dark"] {
+    --bg: var(--bg-dark);
+    --text: var(--text-dark);
+  }
+
+  header {
+    padding: 1rem;
+    background: var(--primary);
+    color: #222;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  header button {
+    background: transparent;
+    border: 1px solid #222;
+    padding: 0.4rem 0.8rem;
+    margin-left: 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+  header button:hover {
+    background: #222;
+    color: var(--primary);
+  }
+
+  main {
+    padding: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  ul.tarefas {
+    list-style: none;
+    padding: 0;
+  }
+
+  ul.tarefas li {
+    background: var(--primary);
+    margin-bottom: 0.8rem;
+    padding: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #222;
+    user-select: none;
+  }
+  ul.tarefas li:hover {
+    opacity: 0.8;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal {
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 10px;
+    max-width: 500px;
+    width: 100%;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal textarea, .modal input[type="text"] {
+    width: 100%;
+    padding: 0.6rem;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    resize: vertical;
+    background-color: var(--bg);
+    color: var(--text);
+  }
+  .modal textarea:focus, .modal input[type="text"]:focus {
+    outline-color: var(--primary);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .modal-header h2 {
+    margin: 0;
+  }
+
+  .btn-close {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: var(--text);
+  }
+  .btn-close:hover {
+    color: var(--primary);
+  }
+
+  /* Responsividade */
+  @media (max-width: 600px) {
+    ul.tarefas li {
       font-size: 1rem;
+      padding: 0.8rem;
     }
-    .toolbar {
-      display: flex;
-      gap: 10px;
-    }
-    button {
-      padding: 0.6rem 1rem;
-      border: none;
-      border-radius: 8px;
-      background: #333;
-      color: var(--text);
-      cursor: pointer;
-      font-weight: 500;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    button:hover { background: #444; }
-    button.primary { background: var(--accent); color: #000; }
-    button.danger { background: var(--high-prio); color: white; }
-
-    /* Board */
-    #board {
-      display: flex;
-      gap: 1.5rem;
-      padding: 1.5rem;
-      overflow-x: auto;
-      min-height: calc(100vh - 120px);
-    }
-    .coluna {
-      background: var(--dark-card);
-      border-radius: 12px;
-      padding: 1rem;
-      min-width: 280px;
-      max-width: 320px;
-      height: fit-content;
-    }
-    .coluna-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    .coluna-title {
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: var(--accent);
-    }
-    .task-count {
-      background: #333;
-      padding: 0.2rem 0.5rem;
-      border-radius: 10px;
-      font-size: 0.8rem;
-    }
-
-    /* Tarefas */
-    .tarefa {
-      background: #252525;
-      border-radius: 10px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      cursor: grab;
-      border-left: 4px solid var(--accent);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .tarefa:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-    .tarefa.dragging {
-      opacity: 0.5;
-      background: #333;
-    }
-    .tarefa-title {
-      font-weight: 500;
-      margin-bottom: 0.5rem;
-      word-break: break-word;
-    }
-    .tarefa-priority {
-      display: inline-block;
-      padding: 0.2rem 0.5rem;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-    }
-    .high { background: var(--high-prio); }
-    .medium { background: var(--medium-prio); color: #000; }
-    .low { background: var(--low-prio); color: #000; }
-    .tarefa-due {
-      font-size: 0.85rem;
-      color: #aaa;
-      margin-bottom: 0.5rem;
-    }
-    .tarefa-due.overdue { color: var(--high-prio); }
-    .progress-container {
-      height: 6px;
-      background: #333;
-      border-radius: 3px;
-      margin: 0.5rem 0;
-    }
-    .progress-bar {
-      height: 100%;
-      border-radius: 3px;
-      background: var(--accent);
-      transition: width 0.3s;
-    }
-    /* Correção aplicada: atualização na estilização das ações da tarefa */
-    .tarefa-actions {
-      display: flex;
-      gap: 0.3rem;
-      margin-top: 0.5rem;
-      flex-wrap: wrap;
-    }
-    .tarefa-actions button {
-      padding: 0.3rem 0.5rem;
-      font-size: 0.75rem;
-      white-space: nowrap;
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 1rem;
-      right: 1rem;
-      background: var(--accent);
-      color: #000;
-      padding: 0.8rem 1.2rem;
-      border-radius: 8px;
-      font-weight: 500;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 1000;
-    }
-    .toast.show { opacity: 1; }
-
-    /* Modal */
     .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
+      max-width: 100%;
+      padding: 1rem;
     }
-    .modal-content {
-      background: var(--dark-card);
-      border-radius: 12px;
-      padding: 1.5rem;
-      width: 90%;
-      max-width: 600px;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-    /* Correção aplicada: estilos para cabeçalho do modal e botão de fechar */
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    .close-modal {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: var(--text);
-    }
-  </style>
+  }
+</style>
 </head>
-<body>
+<body data-theme="light" lang="pt-BR">
 
 <header>
-  <h1>FJNOTES</h1>
-  <input type="search" id="searchInput" placeholder="Buscar tarefas...">
-  <div class="toolbar">
-    <button id="btnUndo" title="Desfazer (Ctrl+Z)">↩️ Undo</button>
-    <button id="btnRedo" title="Refazer (Ctrl+Y)">↪️ Redo</button>
-    <button id="btnAddCol" class="primary">+ Coluna</button>
+  <div>
+    <button id="btnToggleTheme" aria-label="Alternar tema">🌞 / 🌙</button>
+    <button id="btnToggleLang" aria-label="Alternar idioma">PT / EN</button>
   </div>
 </header>
 
-<main id="board">
-  <!-- Colunas serão renderizadas aqui via JS -->
+<main>
+  <ul class="tarefas" id="tarefasList" aria-label="Lista de tarefas">
+    <!-- Tarefas são inseridas aqui pelo JS -->
+  </ul>
 </main>
 
-<div class="toast" id="toast"></div>
-
-<!-- Modal de Comentários -->
-<div class="modal" id="commentModal">
-  <div class="modal-content">
-    <!-- O cabeçalho será injetado via JS -->
-    <div id="commentsList"></div>
-    <textarea id="newComment" placeholder="Adicione um comentário..." style="width: 100%; margin: 1rem 0;"></textarea>
-    <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
-      <button id="cancelComment">Cancelar</button>
-      <button class="primary" id="saveComment">Salvar</button>
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Título da tarefa</h2>
+      <button class="btn-close" id="btnCloseModal" aria-label="Fechar modal">&times;</button>
     </div>
+    <input type="text" id="modalTaskTitle" aria-label="Título da tarefa editável" />
+    <textarea id="modalTaskDesc" rows="6" aria-label="Descrição da tarefa editável"></textarea>
   </div>
 </div>
 
 <script>
-  // Estado do aplicativo
-  let state = {
-    columns: [],
-    history: [],
-    historyIndex: -1,
-    currentTask: null
-  };
+  // Dados iniciais de tarefas (com títulos e descrições)
+  const tarefas = [
+    {
+      id: 1,
+      title: {
+        pt: "Comprar mantimentos",
+        en: "Buy groceries"
+      },
+      description: {
+        pt: "Comprar leite, ovos, pão e frutas.",
+        en: "Buy milk, eggs, bread and fruits."
+      }
+    },
+    {
+      id: 2,
+      title: {
+        pt: "Estudar JavaScript",
+        en: "Study JavaScript"
+      },
+      description: {
+        pt: "Revisar funções, arrays e objetos.",
+        en: "Review functions, arrays, and objects."
+      }
+    },
+    {
+      id: 3,
+      title: {
+        pt: "Fazer exercício",
+        en: "Do exercise"
+      },
+      description: {
+        pt: "Caminhar 30 minutos.",
+        en: "Walk 30 minutes."
+      }
+    }
+  ];
+
+  // Estado do app
+  let currentLang = 'pt';
+  let currentTheme = 'light';
+  let currentTaskId = null;
 
   // Elementos DOM
-  const DOM = {
-    board: document.getElementById('board'),
-    searchInput: document.getElementById('searchInput'),
-    btnUndo: document.getElementById('btnUndo'),
-    btnRedo: document.getElementById('btnRedo'),
-    btnAddCol: document.getElementById('btnAddCol'),
-    toast: document.getElementById('toast'),
-    commentModal: document.getElementById('commentModal'),
-    commentsList: document.getElementById('commentsList'),
-    newComment: document.getElementById('newComment'),
-    saveComment: document.getElementById('saveComment'),
-    cancelComment: document.getElementById('cancelComment')
-  };
+  const tarefasList = document.getElementById('tarefasList');
+  const modalOverlay = document.getElementById('modalOverlay');
+  const btnCloseModal = document.getElementById('btnCloseModal');
+  const modalTaskTitle = document.getElementById('modalTaskTitle');
+  const modalTaskDesc = document.getElementById('modalTaskDesc');
+  const btnToggleTheme = document.getElementById('btnToggleTheme');
+  const btnToggleLang = document.getElementById('btnToggleLang');
 
-  // Inicialização
-  function init() {
-    loadState();
-    renderBoard();
-    setupEventListeners();
-    showToast('FJNOTES carregado!');
-  }
-
-  // Carregar estado do localStorage
-  function loadState() {
-    const saved = localStorage.getItem('fjnotes-state');
-    if (saved) {
-      state = JSON.parse(saved);
-      // Garantir que todas as colunas tenham um array de tarefas
-      state.columns.forEach(col => {
-        if (!col.tasks) col.tasks = [];
-      });
-    } else {
-      // Estado inicial
-      state.columns = [
-        { id: Date.now(), title: 'Para Fazer', tasks: [] },
-        { id: Date.now() + 1, title: 'Em Progresso', tasks: [] },
-        { id: Date.now() + 2, title: 'Concluído', tasks: [] }
-      ];
-      saveState();
-    }
-  }
-
-  // Salvar estado no localStorage
-  function saveState() {
-    // Limitar histórico a 50 estados
-    if (state.history.length > 50) state.history.shift();
-    
-    // Adicionar snapshot ao histórico
-    state.history.push(JSON.stringify(state.columns));
-    state.historyIndex = state.history.length - 1;
-    
-    localStorage.setItem('fjnotes-state', JSON.stringify(state));
-    updateUndoRedoButtons();
-  }
-
-  // Renderizar o board
-  function renderBoard() {
-    DOM.board.innerHTML = '';
-    
-    state.columns.forEach(column => {
-      const colEl = document.createElement('div');
-      colEl.className = 'coluna';
-      colEl.dataset.columnId = column.id;
-      
-      // Header da coluna
-      const header = document.createElement('div');
-      header.className = 'coluna-header';
-      
-      const title = document.createElement('div');
-      title.className = 'coluna-title';
-      title.textContent = column.title;
-      
-      const count = document.createElement('div');
-      count.className = 'task-count';
-      count.textContent = column.tasks.length;
-      
-      const deleteBtn = document.createElement('button');
-      deleteBtn.innerHTML = '🗑️';
-      deleteBtn.title = 'Remover coluna';
-      deleteBtn.onclick = () => deleteColumn(column.id);
-      
-      header.appendChild(title);
-      header.appendChild(count);
-      header.appendChild(deleteBtn);
-      colEl.appendChild(header);
-      
-      // Tarefas
-      column.tasks.forEach(task => {
-        const taskEl = createTaskElement(task, column.id);
-        colEl.appendChild(taskEl);
-      });
-      
-      // Botão para adicionar tarefa
-      const addTaskBtn = document.createElement('button');
-      addTaskBtn.className = 'primary';
-      addTaskBtn.style.width = '100%';
-      addTaskBtn.textContent = '+ Adicionar Tarefa';
-      addTaskBtn.onclick = () => addTaskToColumn(column.id);
-      colEl.appendChild(addTaskBtn);
-      
-      DOM.board.appendChild(colEl);
-    });
-    
-    // Habilitar drag and drop
-    setupDragAndDrop();
-  }
-
-  // Criar elemento de tarefa
-  function createTaskElement(task, columnId) {
-    const taskEl = document.createElement('div');
-    taskEl.className = 'tarefa';
-    taskEl.draggable = true;
-    taskEl.dataset.taskId = task.id;
-    taskEl.dataset.columnId = columnId;
-    
-    // Prioridade
-    const priority = document.createElement('div');
-    priority.className = `tarefa-priority ${task.priority.toLowerCase()}`;
-    priority.textContent = task.priority;
-    
-    // Título
-    const title = document.createElement('div');
-    title.className = 'tarefa-title';
-    title.textContent = task.title;
-    title.contentEditable = true;
-    title.onblur = () => {
-      task.title = title.textContent;
-      saveState();
-    };
-    
-    // Data de vencimento
-    const dueDate = document.createElement('div');
-    dueDate.className = 'tarefa-due';
-    if (task.dueDate) {
-      const due = new Date(task.dueDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      if (due < today && task.progress < 100) {
-        dueDate.classList.add('overdue');
-        dueDate.textContent = `Venceu em ${due.toLocaleDateString()}`;
-      } else {
-        dueDate.textContent = `Vence em ${due.toLocaleDateString()}`;
-      }
-    } else {
-      dueDate.textContent = 'Sem data';
-    }
-    
-    // Progresso
-    const progressContainer = document.createElement('div');
-    progressContainer.className = 'progress-container';
-    
-    const progressBar = document.createElement('div');
-    progressBar.className = 'progress-bar';
-    progressBar.style.width = `${task.progress}%`;
-    
-    progressContainer.appendChild(progressBar);
-    
-    // Ações
-    const actions = document.createElement('div');
-    actions.className = 'tarefa-actions';
-    
-    const progressBtn = document.createElement('button');
-    progressBtn.innerHTML = '📈 Progresso';
-    progressBtn.onclick = () => updateTaskProgress(task.id, columnId);
-    
-    const priorityBtn = document.createElement('button');
-    priorityBtn.innerHTML = '⚠️ Prioridade';
-    priorityBtn.onclick = () => updateTaskPriority(task.id, columnId);
-    
-    const commentBtn = document.createElement('button');
-    commentBtn.innerHTML = '💬 Comentar';
-    commentBtn.onclick = () => openCommentModal(task, columnId);
-    
-    const deleteBtn = document.createElement('button');
-    deleteBtn.innerHTML = '🗑️';
-    deleteBtn.onclick = () => deleteTask(task.id, columnId);
-    
-    actions.appendChild(progressBtn);
-    actions.appendChild(priorityBtn);
-    actions.appendChild(commentBtn);
-    actions.appendChild(deleteBtn);
-    
-    // Montar tarefa
-    taskEl.appendChild(priority);
-    taskEl.appendChild(title);
-    taskEl.appendChild(dueDate);
-    taskEl.appendChild(progressContainer);
-    taskEl.appendChild(actions);
-    
-    return taskEl;
-  }
-
-  // Configurar drag and drop
-  function setupDragAndDrop() {
-    const tasks = document.querySelectorAll('.tarefa');
-    const columns = document.querySelectorAll('.coluna');
-    
-    tasks.forEach(task => {
-      task.addEventListener('dragstart', (e) => {
-        task.classList.add('dragging');
-        e.dataTransfer.setData('text/plain', JSON.stringify({
-          taskId: task.dataset.taskId,
-          fromColumnId: task.dataset.columnId
-        }));
-      });
-      
-      task.addEventListener('dragend', () => {
-        task.classList.remove('dragging');
-      });
-    });
-    
-    columns.forEach(column => {
-      column.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const draggingTask = document.querySelector('.dragging');
-        if (draggingTask) {
-          const afterElement = getDragAfterElement(column, e.clientY);
-          if (afterElement) {
-            column.insertBefore(draggingTask, afterElement);
-          } else {
-            column.appendChild(draggingTask);
-          }
+  // Função para renderizar lista de tarefas
+  function renderTarefas() {
+    tarefasList.innerHTML = '';
+    tarefas.forEach(t => {
+      const li = document.createElement('li');
+      li.textContent = t.title[currentLang];
+      li.setAttribute('tabindex', '0');
+      li.setAttribute('role', 'button');
+      li.setAttribute('aria-pressed', 'false');
+      li.dataset.id = t.id;
+      li.addEventListener('click', () => openModal(t.id));
+      li.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openModal(t.id);
         }
       });
-      
-      column.addEventListener('drop', (e) => {
-        e.preventDefault();
-        const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-        const toColumnId = column.dataset.columnId;
-        
-        moveTask(data.taskId, data.fromColumnId, toColumnId);
-      });
+      tarefasList.appendChild(li);
     });
   }
 
-  // Helper para posicionamento durante drag
-  function getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll('.tarefa:not(.dragging)')];
-    
-    return draggableElements.reduce((closest, child) => {
-      const box = child.getBoundingClientRect();
-      const offset = y - box.top - box.height / 2;
-      
-      if (offset < 0 && offset > closest.offset) {
-        return { offset: offset, element: child };
-      } else {
-        return closest;
-      }
-    }, { offset: Number.NEGATIVE_INFINITY }).element;
+  // Abrir modal com tarefa específica
+  function openModal(id) {
+    currentTaskId = id;
+    const tarefa = tarefas.find(t => t.id === id);
+    modalTaskTitle.value = tarefa.title[currentLang];
+    modalTaskDesc.value = tarefa.description[currentLang];
+    modalOverlay.classList.add('active');
+    modalTaskTitle.focus();
   }
 
-  // Mover tarefa entre colunas
-  function moveTask(taskId, fromColumnId, toColumnId) {
-    if (fromColumnId === toColumnId) return;
-    
-    const fromColumn = state.columns.find(col => col.id == fromColumnId);
-    const toColumn = state.columns.find(col => col.id == toColumnId);
-    
-    if (!fromColumn || !toColumn) return;
-    
-    const taskIndex = fromColumn.tasks.findIndex(task => task.id == taskId);
-    if (taskIndex === -1) return;
-    
-    const task = fromColumn.tasks.splice(taskIndex, 1)[0];
-    toColumn.tasks.push(task);
-    
-    saveState();
-    renderBoard();
-  }
-
-  // Adicionar nova coluna
-  function addNewColumn() {
-    const title = prompt('Nome da nova coluna:', 'Nova Coluna');
-    if (!title) return;
-    
-    state.columns.push({
-      id: Date.now(),
-      title,
-      tasks: []
-    });
-    
-    saveState();
-    renderBoard();
-    showToast(`Coluna "${title}" adicionada!`);
-  }
-
-  // Remover coluna
-  function deleteColumn(columnId) {
-    if (!confirm('Tem certeza que deseja remover esta coluna e todas as suas tarefas?')) return;
-    
-    const column = state.columns.find(col => col.id == columnId);
-    if (!column) return;
-    
-    state.columns = state.columns.filter(col => col.id != columnId);
-    saveState();
-    renderBoard();
-    showToast(`Coluna "${column.title}" removida!`);
-  }
-
-  // Adicionar tarefa à coluna (CORREÇÃO APLICADA)
-  function addTaskToColumn(columnId) {
-    const title = prompt('Título da tarefa:', 'Nova Tarefa');
-    if (!title) return;
-    
-    const column = state.columns.find(col => col.id == columnId);
-    if (!column) return;
-    
-    // Solicita a data no formato DD/MM/AAAA e formata para ISO
-    const dueDateInput = prompt('Data de vencimento (DD/MM/AAAA):', '');
-    let formattedDate = '';
-    if (dueDateInput) {
-      const [day, month, year] = dueDateInput.split('/');
-      if (day && month && year) {
-        formattedDate = new Date(`${year}-${month}-${day}`).toISOString();
-      }
+  // Fechar modal
+  function closeModal() {
+    // Salvar edição antes de fechar
+    if(currentTaskId !== null) {
+      const tarefa = tarefas.find(t => t.id === currentTaskId);
+      tarefa.title[currentLang] = modalTaskTitle.value.trim() || tarefa.title[currentLang];
+      tarefa.description[currentLang] = modalTaskDesc.value.trim() || tarefa.description[currentLang];
+      renderTarefas();
     }
-    
-    column.tasks.push({
-      id: Date.now(),
-      title,
-      priority: 'Medium',
-      dueDate: formattedDate,
-      progress: 0,
-      comments: []
-    });
-    
-    saveState();
-    renderBoard();
-    showToast(`Tarefa "${title}" adicionada!`);
+    modalOverlay.classList.remove('active');
+    currentTaskId = null;
   }
 
-  // Atualizar progresso da tarefa
-  function updateTaskProgress(taskId, columnId) {
-    const column = state.columns.find(col => col.id == columnId);
-    if (!column) return;
-    
-    const task = column.tasks.find(t => t.id == taskId);
-    if (!task) return;
-    
-    const newProgress = prompt('Progresso (0-100):', task.progress);
-    if (!newProgress || isNaN(newProgress)) return;
-    
-    task.progress = Math.min(100, Math.max(0, parseInt(newProgress)));
-    saveState();
-    renderBoard();
+  // Alternar tema claro/escuro
+  function toggleTheme() {
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    document.body.setAttribute('data-theme', currentTheme);
   }
 
-  // Atualizar prioridade da tarefa
-  function updateTaskPriority(taskId, columnId) {
-    const column = state.columns.find(col => col.id == columnId);
-    if (!column) return;
-    
-    const task = column.tasks.find(t => t.id == taskId);
-    if (!task) return;
-    
-    const priorities = ['High', 'Medium', 'Low'];
-    const currentIndex = priorities.indexOf(task.priority);
-    const nextIndex = (currentIndex + 1) % priorities.length;
-    
-    task.priority = priorities[nextIndex];
-    saveState();
-    renderBoard();
+  // Alternar idioma pt/en
+  function toggleLang() {
+    currentLang = currentLang === 'pt' ? 'en' : 'pt';
+    document.documentElement.lang = currentLang === 'pt' ? 'pt-BR' : 'en-US';
+    renderTarefas();
+    if(currentTaskId !== null) {
+      // Atualizar conteúdo do modal com nova língua
+      const tarefa = tarefas.find(t => t.id === currentTaskId);
+      modalTaskTitle.value = tarefa.title[currentLang];
+      modalTaskDesc.value = tarefa.description[currentLang];
+    }
   }
 
-  // Abrir modal de comentários (CORREÇÃO APLICADA)
-  function openCommentModal(task, columnId) {
-    state.currentTask = { task, columnId };
-    
-    // Injetar cabeçalho do modal com o número de comentários e botão de fechar
-    DOM.commentsList.innerHTML = `
-      <div class="modal-header">
-        <h3>Comentários (${(task.comments || []).length})</h3>
-        <button class="close-modal" onclick="DOM.commentModal.style.display='none'">×</button>
-      </div>
-    `;
-    
-    const commentsContainer = document.createElement('div');
-    (task.comments || []).forEach(comment => {
-      const commentEl = document.createElement('div');
-      commentEl.style.marginBottom = '1rem';
-      commentEl.innerHTML = `
-        <div style="display:flex; justify-content:space-between;">
-          <strong>${comment.author}</strong>
-          <small style="color: #aaa;">${formatDate(comment.date)}</small>
-        </div>
-        <p style="margin-top:0.5rem;">${comment.text}</p>
-      `;
-      commentsContainer.appendChild(commentEl);
-    });
-    
-    DOM.commentsList.appendChild(commentsContainer);
-    DOM.newComment.value = '';
-    DOM.commentModal.style.display = 'flex';
-  }
+  // Eventos
+  btnCloseModal.addEventListener('click', closeModal);
+  modalOverlay.addEventListener('click', (e) => {
+    if(e.target === modalOverlay) {
+      closeModal();
+    }
+  });
 
-  // Função auxiliar para formatar data (CORREÇÃO APLICADA)
-  function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
+  btnToggleTheme.addEventListener('click', toggleTheme);
+  btnToggleLang.addEventListener('click', toggleLang);
 
-  // Salvar comentário
-  function saveComment() {
-    const text = DOM.newComment.value.trim();
-    if (!text) return;
-    
-    const { task, columnId } = state.currentTask;
-    const column = state.columns.find(col => col.id == columnId);
-    if (!column) return;
-    
-    const taskInColumn = column.tasks.find(t => t.id == task.id);
-    if (!taskInColumn) return;
-    
-    if (!taskInColumn.comments) taskInColumn.comments = [];
-    
-    taskInColumn.comments.push({
-      author: prompt('Seu nome:', 'Usuário') || 'Anônimo',
-      text,
-      date: new Date().toISOString()
-    });
-    
-    saveState();
-    openCommentModal(taskInColumn, columnId);
-    showToast('Comentário adicionado!');
-  }
+  // Salvar alteração em tempo real no modal
+  modalTaskTitle.addEventListener('input', () => {
+    if(currentTaskId !== null) {
+      const tarefa = tarefas.find(t => t.id === currentTaskId);
+      tarefa.title[currentLang] = modalTaskTitle.value;
+      renderTarefas();
+    }
+  });
 
-  // Deletar tarefa
-  function deleteTask(taskId, columnId) {
-    if (!confirm('Tem certeza que deseja remover esta tarefa?')) return;
-    
-    const column = state.columns.find(col => col.id == columnId);
-    if (!column) return;
-    
-    const taskIndex = column.tasks.findIndex(t => t.id == taskId);
-    if (taskIndex === -1) return;
-    
-    const task = column.tasks[taskIndex];
-    column.tasks.splice(taskIndex, 1);
-    
-    saveState();
-    renderBoard();
-    showToast(`Tarefa "${task.title}" removida!`);
-  }
+  modalTaskDesc.addEventListener('input', () => {
+    if(currentTaskId !== null) {
+      const tarefa = tarefas.find(t => t.id === currentTaskId);
+      tarefa.description[currentLang] = modalTaskDesc.value;
+    }
+  });
 
-  // Undo/Redo
-  function undo() {
-    if (state.historyIndex <= 0) return;
-    
-    state.historyIndex--;
-    state.columns = JSON.parse(state.history[state.historyIndex]);
-    localStorage.setItem('fjnotes-state', JSON.stringify(state));
-    renderBoard();
-    updateUndoRedoButtons();
-  }
-
-  function redo() {
-    if (state.historyIndex >= state.history.length - 1) return;
-    
-    state.historyIndex++;
-    state.columns = JSON.parse(state.history[state.historyIndex]);
-    localStorage.setItem('fjnotes-state', JSON.stringify(state));
-    renderBoard();
-    updateUndoRedoButtons();
-  }
-
-  function updateUndoRedoButtons() {
-    DOM.btnUndo.disabled = state.historyIndex <= 0;
-    DOM.btnRedo.disabled = state.historyIndex >= state.history.length - 1;
-  }
-
-  // Toast
-  function showToast(message, duration = 3000) {
-    DOM.toast.textContent = message;
-    DOM.toast.classList.add('show');
-    
-    setTimeout(() => {
-      DOM.toast.classList.remove('show');
-    }, duration);
-  }
-
-  // Configurar event listeners
-  function setupEventListeners() {
-    DOM.btnAddCol.addEventListener('click', addNewColumn);
-    DOM.btnUndo.addEventListener('click', undo);
-    DOM.btnRedo.addEventListener('click', redo);
-    DOM.saveComment.addEventListener('click', saveComment);
-    DOM.cancelComment.addEventListener('click', () => {
-      DOM.commentModal.style.display = 'none';
-    });
-    
-    // Atalhos de teclado
-    document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey && e.key === 'z') {
-        e.preventDefault();
-        undo();
-      }
-      
-      if (e.ctrlKey && e.key === 'y') {
-        e.preventDefault();
-        redo();
-      }
-    });
-    
-    // Busca
-    DOM.searchInput.addEventListener('input', () => {
-      const searchTerm = DOM.searchInput.value.toLowerCase();
-      
-      document.querySelectorAll('.tarefa').forEach(task => {
-        const title = task.querySelector('.tarefa-title').textContent.toLowerCase();
-        task.style.display = title.includes(searchTerm) ? '' : 'none';
-      });
-    });
-  }
-
-  // Iniciar aplicação
-  window.addEventListener('DOMContentLoaded', init);
+  // Renderizar na inicialização
+  renderTarefas();
 </script>
+
 </body>
 </html>

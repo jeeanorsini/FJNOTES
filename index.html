@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FJNOTES - Gerenciador Visual</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #121212; /* fundo escuro */
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    color: #FFCC00; /* amarelo marca */
+    margin-bottom: 20px;
+  }
+  #controles {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  button {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #000; /* fundo preto */
+    color: #FFCC00; /* amarelo marca */
+    transition: background-color 0.2s, color 0.2s;
+  }
+  button:hover {
+    background-color: #222;
+  }
+  /* Botões específicos para destaque */
+  .highlight {
+    background-color: #FFCC00;
+    color: #000;
+  }
+
+  #botoesMapa {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  /* Quadro de colunas */
+  #telaPrincipal {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+  }
+  .coluna {
+    background: #222;
+    padding: 10px;
+    min-width: 200px;
+    border-radius: 4px;
+    border: 1px solid #FFCC00;
+  }
+  .coluna h3 {
+    margin-top: 0;
+    color: #FFCC00;
+  }
+  .cartao {
+    background: #333;
+    padding: 8px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    cursor: grab;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  /* Mapa mental com SVG */
+  #mapaContainer {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    border: 2px solid #FFCC00;
+    margin-top: 20px;
+    display: none;
+    background-color: #1e1e1e;
+  }
+  #svgConexoes {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+  }
+  #mapaMental {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 10px;
+    z-index: 1;
+  }
+  .topico {
+    background: #FFCC00;
+    border: 2px solid #000;
+    padding: 10px;
+    border-radius: 6px;
+    margin: 10px;
+    min-width: 120px;
+    text-align: center;
+    cursor: grab;
+    position: absolute;
+    box-shadow: 0 0 10px rgba(0,0,0,0.7);
+  }
+  .topico input {
+    width: 80%;
+    margin-bottom: 5px;
+    border: 1px solid #000;
+    border-radius: 4px;
+    padding: 4px;
+  }
+  .topico button {
+    margin-top: 5px;
+    background-color: #000;
+    color: #FFCC00;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .topico button:hover {
+    background-color: #222;
+  }
+  /* Botões de conexão */
+  .conexaoBtn {
+    margin-top: 5px;
+    font-size: 12px;
+    background-color: #000;
+    color: #FFCC00;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .conexaoBtn:hover {
+    background-color: #222;
+  }
+  /* Seleção múltipla */
+  .selecionado {
+    outline: 3px solid #FFCC00;
+    box-shadow: 0 0 10px #FFCC00;
+  }
+</style>
+<title>FJNOTES - Gerenciador Visual</title>
+</head>
+<body>
+
+<h1>FJNOTES - Gerenciador Visual</h1>
+
+<div id="controles">
+  <button onclick="adicionarColuna()">Adicionar Coluna</button>
+  <button onclick="mostrarTabuleiro()">Mostrar Quadro</button>
+  <button onclick="mostrarMapaMental()">Mostrar Mapa Mental</button>
+  <button onclick="exportarDados()">Exportar Dados</button>
+  <button onclick="mostrarImportar()">Importar Dados</button>
+  <button onclick="selecionarParaConectar()">Selecionar Tópicos para Conexão</button>
+  <button onclick="conectarSelecionados()">Conectar Selecionados</button>
+  <button onclick="limparSelecao()">Limpar Seleção</button>
+</div>
+
+<div id="botoesMapa">
+  <button onclick="criarTopico()">Adicionar Topico</button>
+  <button onclick="limparMapa()">Limpar Mapa</button>
+</div>
+
+<!-- Área do quadro de colunas -->
+<div id="telaPrincipal"></div>
+
+<!-- Área do mapa mental -->
+<div id="mapaContainer">
+  <svg id="svgConexoes"></svg>
+  <div id="mapaMental"></div>
+</div>
+
+<!-- Input oculto para importação -->
+<input type="file" id="arquivoImportar" style="display:none" onchange="importarDados(event)" />
+
+<script>
+  let colunas = [];
+  let mapaMental = [];
+  let modoMapa = false;
+  let selecao = []; // IDs dos tópicos selecionados
+
+  // Carregar do LocalStorage
+  const dadosSalvos = localStorage.getItem('dadosGerenciador');
+  if (dadosSalvos) {
+    const dados = JSON.parse(dadosSalvos);
+    colunas = dados.colunas || [];
+    mapaMental = dados.mapaMental || [];
+  }
+
+  function salvarDados() {
+    localStorage.setItem('dadosGerenciador', JSON.stringify({ colunas, mapaMental }));
+  }
+
+  // =================== Gerenciamento de Colunas ====================
+  function adicionarColuna() {
+    const nome = prompt('Nome da nova coluna:', 'Nova coluna');
+    if (nome) {
+      const novaColuna = { id: Date.now(), nome, cartoes: [] };
+      colunas.push(novaColuna);
+      salvarDados();
+      renderizarColunas();
+    }
+  }
+
+  function renderizarColunas() {
+    const container = document.getElementById('telaPrincipal');
+    container.innerHTML = '';
+    colunas.forEach(col => {
+      const divCol = document.createElement('div');
+      divCol.className = 'coluna';
+      divCol.setAttribute('data-id', col.id);
+
+      const titulo = document.createElement('h3');
+      titulo.textContent = col.nome;
+
+      const btnAddCard = document.createElement('button');
+      btnAddCard.textContent = 'Adicionar Cartão';
+      btnAddCard.onclick = () => {
+        const texto = prompt('Conteúdo do cartão:', '');
+        if (texto) {
+          col.cartoes.push({ id: Date.now(), texto });
+          salvarDados();
+          renderizarColunas();
+        }
+      };
+
+      divCol.appendChild(titulo);
+      divCol.appendChild(btnAddCard);
+
+      // Cartões
+      const cardsDiv = document.createElement('div');
+      col.cartoes.forEach((cartao, index) => {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'cartao';
+        cardEl.draggable = true;
+        cardEl.setAttribute('data-colid', col.id);
+        cardEl.setAttribute('data-index', index);
+        cardEl.ondragstart = (e) => {
+          e.dataTransfer.setData('cartao', JSON.stringify({ colId: col.id, index }));
+        };
+        // Edição do cartão
+        cardEl.onclick = () => {
+          const novoTexto = prompt('Editar cartão:', cartao.texto);
+          if (novoTexto !== null) {
+            col.cartoes[index].texto = novoTexto;
+            salvarDados();
+            renderizarColunas();
+          }
+        };
+        // Texto
+        const spanText = document.createElement('span');
+        spanText.textContent = cartao.texto;
+        cardEl.appendChild(spanText);
+
+        // Excluir cartão
+        const btnExcluir = document.createElement('button');
+        btnExcluir.textContent = 'X';
+        btnExcluir.onclick = () => {
+          col.cartoes.splice(index, 1);
+          salvarDados();
+          renderizarColunas();
+        };
+        cardEl.appendChild(btnExcluir);
+
+        cardsDiv.appendChild(cardEl);
+      });
+
+      // Drag-and-drop para mover entre colunas
+      divCol.ondragover = (e) => e.preventDefault();
+      divCol.ondrop = (e) => {
+        const data = JSON.parse(e.dataTransfer.getData('cartao'));
+        const colOrigem = colunas.find(c => c.id === data.colId);
+        if (colOrigem) {
+          const cartao = colOrigem.cartoes.splice(data.index, 1)[0];
+          col.cartoes.push(cartao);
+          salvarDados();
+          renderizarColunas();
+        }
+      };
+
+      divCol.appendChild(cardsDiv);
+      container.appendChild(divCol);
+    });
+  }
+
+  // =================== Gerenciamento do Mapa Mental ====================
+  function criarTopico() {
+    const texto = prompt('Texto do tópico:', 'Novo tópico');
+    if (texto) {
+      const id = Date.now();
+      mapaMental.push({ id, texto, conexoes: [], pos: {x: Math.random()*500+50, y: Math.random()*400+50} });
+      salvarDados();
+      renderizarMapaMental();
+    }
+  }
+
+  function limparMapa() {
+    if (confirm('Deseja limpar todo o mapa mental?')) {
+      mapaMental = [];
+      salvarDados();
+      renderizarMapaMental();
+    }
+  }
+
+  function renderizarMapaMental() {
+    const container = document.getElementById('mapaMental');
+    const svg = document.getElementById('svgConexoes');
+    svg.innerHTML = ''; // limpar conexões
+    container.innerHTML = '';
+
+    // Desenhar tópicos
+    mapaMental.forEach(tp => {
+      const div = document.createElement('div');
+      div.className = 'topico';
+      div.setAttribute('data-id', tp.id);
+      div.style.left = tp.pos.x + 'px';
+      div.style.top = tp.pos.y + 'px';
+
+      // Destaque se selecionado
+      if (selecao.includes(tp.id)) {
+        div.classList.add('selecionado');
+      }
+
+      // Para arrastar o tópico
+      div.draggable = true;
+      div.ondragstart = (e) => {
+        e.dataTransfer.setData('topico', tp.id);
+      };
+      // Para reposicionar ao soltar
+      div.ondragend = (e) => {
+        const id = tp.id;
+        tp.pos.x = e.pageX - 50;
+        tp.pos.y = e.pageY - 20;
+        salvarDados();
+        renderizarMapaMental();
+      };
+
+      // Evento para editar texto direto
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = tp.texto;
+      input.onchange = () => {
+        tp.texto = input.value;
+        salvarDados();
+        renderizarMapaMental();
+      };
+      div.appendChild(input);
+
+      // Botões para conexão
+      const btnConectar = document.createElement('button');
+      btnConectar.textContent = 'Conectar';
+      btnConectar.className = 'conexaoBtn';
+      btnConectar.onclick = () => {
+        if (!selecao.includes(tp.id)) {
+          selecao.push(tp.id);
+        } else {
+          alert('Já selecionado.');
+        }
+        renderizarMapaMental();
+      };
+      div.appendChild(btnConectar);
+
+      // Botão para remover conexão
+      const btnRemCon = document.createElement('button');
+      btnRemCon.textContent = 'Remover Conexão';
+      btnRemCon.className = 'conexaoBtn';
+      btnRemCon.onclick = () => {
+        if (selecao.length >= 2) {
+          // Remove conexão entre os selecionados
+          for (let i=0; i<selecao.length; i++) {
+            const t1 = mapaMental.find(t => t.id === selecao[i]);
+            for (let j=0; j<selecao.length; j++) {
+              if (i !== j && t1) {
+                t1.conexoes = t1.conexoes.filter(c => c !== selecao[j]);
+              }
+            }
+          }
+          alert('Conexões removidas entre os tópicos selecionados.');
+          limparSelecao();
+          salvarDados();
+          renderizarMapaMental();
+        } else {
+          alert('Selecione pelo menos dois tópicos.');
+        }
+      };
+      div.appendChild(btnRemCon);
+
+      // Botão excluir tópico
+      const btnExcluir = document.createElement('button');
+      btnExcluir.textContent = 'Excluir Tópico';
+      btnExcluir.onclick = () => {
+        if (confirm('Excluir este tópico e suas conexões?')) {
+          // Remove conexões apontando para ele
+          mapaMental.forEach(t => {
+            t.conexoes = t.conexoes.filter(c => c !== tp.id);
+          });
+          // Remove o tópico
+          mapaMental = mapaMental.filter(t => t.id !== tp.id);
+          // Remove da seleção
+          selecao = selecao.filter(id => id !== tp.id);
+          salvarDados();
+          renderizarMapaMental();
+        }
+      };
+      div.appendChild(btnExcluir);
+
+      container.appendChild(div);
+    });
+
+    // Desenhar conexões com curvas
+    mapaMental.forEach(tp => {
+      const fromX = tp.pos.x + 70; // centro do tópico
+      const fromY = tp.pos.y + 20;
+      tp.conexoes.forEach(destId => {
+        const dest = mapaMental.find(t => t.id === destId);
+        if (dest) {
+          const toX = dest.pos.x + 70;
+          const toY = dest.pos.y + 20;
+          // Curva quadrática
+          const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+          const controlX = (fromX + toX) / 2;
+          const controlY = Math.min(fromY, toY) - 50;
+          const d = `M ${fromX} ${fromY} Q ${controlX} ${controlY} ${toX} ${toY}`;
+          path.setAttribute('d', d);
+          path.setAttribute('stroke', '#FFCC00');
+          path.setAttribute('fill', 'none');
+          path.setAttribute('stroke-width', '2');
+          svg.appendChild(path);
+        }
+      });
+    });
+  }
+
+  // =================== Funções de seleção múltipla ====================
+  function selecionarParaConectar() {
+    alert('Clique nos tópicos desejados para selecionar. Depois clique em "Conectar Selecionados".');
+  }
+
+  function limparSelecao() {
+    selecao = [];
+    renderizarMapaMental();
+  }
+
+  function conectarSelecionados() {
+    if (selecao.length >= 2) {
+      // Conecta todos aos demais
+      for (let i=0; i<selecao.length; i++) {
+        const t1 = mapaMental.find(t => t.id === selecao[i]);
+        for (let j=0; j<selecao.length; j++) {
+          if (i !== j && t1) {
+            if (!t1.conexoes.includes(selecao[j]))
+              t1.conexoes.push(selecao[j]);
+          }
+        }
+      }
+      alert('Conexões feitas entre tópicos selecionados.');
+      limparSelecao();
+      salvarDados();
+      renderizarMapaMental();
+    } else {
+      alert('Selecione pelo menos dois tópicos.');
+    }
+  }
+
+  // =================== Exportar e Importar ====================
+  function exportarDados() {
+    const dados = {
+      colunas,
+      mapaMental
+    };
+    const jsonStr = JSON.stringify(dados, null, 2);
+    const blob = new Blob([jsonStr], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'dados-gerenciador.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function mostrarImportar() {
+    document.getElementById('arquivoImportar').click();
+  }
+
+  function importarDados(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const dados = JSON.parse(reader.result);
+        colunas = dados.colunas || [];
+        mapaMental = dados.mapaMental || [];
+        salvarDados();
+        renderizarColunas();
+        renderizarMapaMental();
+        mostrarTabuleiro();
+      } catch (e) {
+        alert('Erro ao importar arquivo.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // =================== Inicialização ====================
+  function mostrarTabuleiro() {
+    document.getElementById('telaPrincipal').style.display = 'flex';
+    document.getElementById('mapaContainer').style.display = 'none';
+    modoMapa = false;
+  }
+  function mostrarMapaMental() {
+    document.getElementById('telaPrincipal').style.display = 'none';
+    document.getElementById('mapaContainer').style.display = 'block';
+    renderizarMapaMental();
+  }
+
+  // inicia com o modo quadro
+  mostrarTabuleiro();
+
+</script>
+</body>
+</html>

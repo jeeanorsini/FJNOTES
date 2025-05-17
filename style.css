@@ -1,212 +1,235 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap');
 :root {
-    --dark-bg: #121212;
-    --dark-card: #1e1e1e;
-    --accent: #FFC107;
-    --text: #e0e0e0;
-    --high-prio: #ff5252;
-    --medium-prio: #ffd740;
-    --low-prio: #69f0ae;
+  --dark-bg: #121212;
+  --dark-card: #1e1e1e;
+  --accent: #FFC107;
+  --text: #e0e0e0;
+  --high-prio: #ff5252;
+  --medium-prio: #ffd740;
+  --low-prio: #69f0ae;
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-    font-family: 'Montserrat', sans-serif;
-    background: var(--dark-bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
+  font-family: 'Montserrat', sans-serif;
+  background: var(--dark-bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
+
 header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 2rem;
-    background: var(--dark-card);
-    border-bottom: 2px solid var(--accent);
-    position: sticky;
-    top: 0;
-    z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: var(--dark-card);
+  border-bottom: 2px solid var(--accent);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
+
 h1 { font-size: 1.8rem; color: var(--accent); }
+
 #searchInput {
-    padding: 0.6rem 1rem;
-    border-radius: 8px;
-    border: none;
-    background: #333;
-    color: var(--text);
-    width: 300px;
-    font-size: 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: none;
+  background: #333;
+  color: var(--text);
+  width: 300px;
+  font-size: 1rem;
 }
+
 .toolbar {
-    display: flex;
-    gap: 10px;
+  display: flex;
+  gap: 10px;
 }
+
 button {
-    padding: 0.6rem 1rem;
-    border: none;
-    border-radius: 8px;
-    background: #333;
-    color: var(--text);
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: #333;
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
+
 button:hover { background: #444; }
 button.primary { background: var(--accent); color: #000; }
 button.danger { background: var(--high-prio); color: white; }
 
 /* Board */
 #board {
-    display: flex;
-    gap: 1.5rem;
-    padding: 1.5rem;
-    overflow-x: auto;
-    min-height: calc(100vh - 120px);
+  display: flex;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  overflow-x: auto;
+  min-height: calc(100vh - 120px);
 }
+
 .coluna {
-    background: var(--dark-card);
-    border-radius: 12px;
-    padding: 1rem;
-    min-width: 280px;
-    max-width: 320px;
-    height: fit-content;
+  background: var(--dark-card);
+  border-radius: 12px;
+  padding: 1rem;
+  min-width: 280px;
+  max-width: 320px;
+  height: fit-content;
 }
+
 .coluna-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
 }
+
 .coluna-title {
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: var(--accent);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--accent);
 }
+
 .task-count {
-    background: #333;
-    padding: 0.2rem 0.5rem;
-    border-radius: 10px;
-    font-size: 0.8rem;
+  background: #333;
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
 }
 
 /* Tarefas */
 .tarefa {
-    background: #252525;
-    border-radius: 10px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    cursor: grab;
-    border-left: 4px solid var(--accent);
-    transition: transform 0.2s, box-shadow 0.2s;
+  background: #252525;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  cursor: grab;
+  border-left: 4px solid var(--accent);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
+
 .tarefa:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
+
 .tarefa.dragging {
-    opacity: 0.5;
-    background: #333;
+  opacity: 0.5;
+  background: #333;
 }
+
 .tarefa-title {
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-    word-break: break-word;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  word-break: break-word;
 }
+
 .tarefa-priority {
-    display: inline-block;
-    padding: 0.2rem 0.5rem;
-    border-radius: 8px;
-    font-size: 0.75rem;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
 }
+
 .high { background: var(--high-prio); }
 .medium { background: var(--medium-prio); color: #000; }
 .low { background: var(--low-prio); color: #000; }
+
 .tarefa-due {
-    font-size: 0.85rem;
-    color: #aaa;
-    margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  color: #aaa;
+  margin-bottom: 0.5rem;
 }
+
 .tarefa-due.overdue { color: var(--high-prio); }
+
 .progress-container {
-    height: 6px;
-    background: #333;
-    border-radius: 3px;
-    margin: 0.5rem 0;
+  height: 6px;
+  background: #333;
+  border-radius: 3px;
+  margin: 0.5rem 0;
 }
+
 .progress-bar {
-    height: 100%;
-    border-radius: 3px;
-    background: var(--accent);
-    transition: width 0.3s;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent);
+  transition: width 0.3s;
 }
-/* Correção aplicada: atualização na estilização das ações da tarefa */
+
 .tarefa-actions {
-    display: flex;
-    gap: 0.3rem;
-    margin-top: 0.5rem;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
 }
+
 .tarefa-actions button {
-    padding: 0.3rem 0.5rem;
-    font-size: 0.75rem;
-    white-space: nowrap;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
 }
 
 /* Toast */
 .toast {
-    position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-    background: var(--accent);
-    color: #000;
-    padding: 0.8rem 1.2rem;
-    border-radius: 8px;
-    font-weight: 500;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    opacity: 0;
-    transition: opacity 0.3s;
-    z-index: 1000;
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  background: var(--accent);
+  color: #000;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 1000;
 }
+
 .toast.show { opacity: 1; }
 
 /* Modal */
 .modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
 }
+
 .modal-content {
-    background: var(--dark-card);
-    border-radius: 12px;
-    padding: 1.5rem;
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
+  background: var(--dark-card);
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
-/* Correção aplicada: estilos para cabeçalho do modal e botão de fechar */
+
 .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
 }
+
 .close-modal {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--text);
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text);
 }

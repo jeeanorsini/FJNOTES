@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>FJNOTES Pro - Tarefas Avançadas</title>
+<title>FJNOTES - Gerenciador Visual</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -17,12 +17,6 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
-body.light {
-  background-color: #fdf6e3;
-  color: #b58900;
-}
-
-/* Cabeçalho */
 header {
   display: flex;
   flex-wrap: wrap;
@@ -51,14 +45,12 @@ body.light #searchInput {
   background-color: #eee8d5;
   color: #b58900;
 }
-#searchInput::placeholder { color: #deb639; }
-
 #botoes {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
   margin-top: 0.5rem;
 }
-
 button {
   padding: 0.4rem 0.8rem;
   border: none;
@@ -77,71 +69,58 @@ button:hover { opacity: 0.8; }
 }
 #toast.show { opacity: 1; }
 
-/* Área principal */
 main {
   flex: 1;
   padding: 1rem 2rem;
   display: flex;
-  flex-wrap: wrap;
   gap: 1rem;
-  overflow-y: auto;
+  overflow-x: auto;
+  align-items: flex-start;
 }
 
-/* Cartões */
-.cartao {
-  background: #fff8dc;
-  border-radius: 12px;
+/* Colunas (listas) */
+.coluna {
+  background-color: #222;
   padding: 1rem;
-  width: 300px;
+  border-radius: 12px;
+  min-width: 250px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 0 10px #ffc10755;
+  max-height: 90vh;
+}
+.coluna h2 {
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color:#ffd700;
+}
+#btnAddCol { margin-bottom: 1rem; }
+
+.tarefa {
+  background: #fff8dc;
+  border-radius: 12px;
+  padding: 0.5rem;
+  margin-bottom: 0.8rem;
+  cursor: grab;
   border: 2px solid currentColor;
-  position: relative;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s;
 }
-.prioridade-alto { border-color: #d32f2f; }
-.prioridade-medio { border-color: #fbc02d; }
-.prioridade-baixo { border-color: #388e3c; }
-
+.tarefa:hover { box-shadow: 0 0 10px #ffd700; }
 .titulo {
-  font-weight: 900; font-size: 1.2rem; margin-bottom: 0.5rem; cursor: text;
+  font-weight: 900; font-size: 1rem; margin-bottom: 0.3rem; cursor: text;
 }
-.titulo:focus { outline: 2px solid #ffc107; }
-
+.titulo:focus { outline: 2px solid #ffd700; }
 .progress-container {
-  background: #ddd; height: 10px; border-radius: 5px; margin: 8px 0;
-  width: 100%; overflow: hidden;
+  background: #ddd; height: 8px; border-radius: 4px; margin: 8px 0;
+  width: 100%;
 }
 .progress-bar {
-  height: 10px; background: #ffc107; width: 0%; border-radius: 5px;
+  height: 8px; background: #ffc107; width: 0%; border-radius: 4px;
   transition: width 0.5s ease;
 }
-
-.info {
-  display: flex; justify-content: space-between; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.5rem;
-}
-.info div { margin: 4px 0; }
-
-.comentarios {
-  margin-top: 0.5rem; border-top: 1px solid #ccc; padding-top: 0.5rem;
-}
-.comentarios h4 { margin: 0 0 0.5rem 0; font-size: 1rem; }
-.comentario {
-  background: #fff; padding: 0.5rem; border-radius: 8px; margin-bottom: 0.5rem; font-size: 0.9rem;
-}
-
-.botoes-acao {
-  display: flex; gap: 4px; margin-top: 0.5rem; flex-wrap: wrap;
-}
-button {
-  padding: 0.4rem 0.8rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.75rem;
-}
-.btnExcluir { background: #d32f2f; color: #fff; }
-.btnComentario { background: #1976d2; color: #fff; }
-.btnSalvar { background: #388e3c; color: #fff; }
-
-.prioridade-badge {
+.badge-pri {
   padding: 0.2rem 0.5rem;
   border-radius: 8px;
   font-size: 0.75rem;
@@ -150,10 +129,22 @@ button {
   display: inline-block;
   min-width: 50px;
   text-align: center;
+  margin-bottom: 0.5rem;
 }
 .prio-alto { background-color: #d32f2f; }
-.prio-medio { background-color: #fbc02d; color: #000; }
+.prio-medio { background-color: #fbc02d; color:#000; }
 .prio-baixo { background-color: #388e3c; }
+
+.botoes-acao {
+  display: flex; gap: 4px; margin-top: 0.5rem; flex-wrap: wrap;
+}
+button {
+  padding: 0.3rem 0.6rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.75rem;
+}
+.btnExcluir { background: #d32f2f; color: #fff; }
+.btnEditar { background: #1976d2; color: #fff; }
+.btnPrioridade { background: #fbc02d; color:#000; }
+.btnProgresso { background: #388e3c; color:#fff; }
 
 #alertaAtrasadas {
   position: fixed;
@@ -182,27 +173,27 @@ button {
 <div id="alertaAtrasadas"></div>
 
 <header>
-  <h1>FJNOTES Pro - Tarefas</h1>
+  <h1>FJNOTES - Gerenciador Visual</h1>
   <input type="search" id="searchInput" placeholder="Buscar..." oninput="filtrarConteudo()" />
   <div id="botoes">
     <button onclick="undoEstado()" id="btnUndo" disabled title="Desfazer">↶ Undo</button>
     <button onclick="redoEstado()" id="btnRedo" disabled title="Refazer">↷ Redo</button>
     <button onclick="toggleTema()" title="Alternar tema">🌓 Tema</button>
+    <button onclick="adicionarColuna()" id="btnAddCol">Adicionar Coluna</button>
   </div>
 </header>
 
-<main id="tarefasContainer">
-  <!-- Cartões serão inseridos aqui dinamicamente -->
+<main id="board">
+  <!-- colunas serão criadas dinamicamente aqui -->
 </main>
 
 <div style="margin:1rem; text-align:center;">
-  <button onclick="adicionarColuna()">Adicionar Lista</button>
   <button onclick="criarTarefa()">Nova Tarefa</button>
   <button onclick="limparTudo()">Limpar Tudo</button>
   <button onclick="mostrarAnalise()">Painel de Análise</button>
 </div>
 
-<!-- Painel de análise oculto -->
+<!-- Painel de análise -->
 <div id="painelAnalise" style="display:none; position:fixed; top:10%; left:10%; width:80%; height:80%; background:#fff; padding:1rem; overflow:auto; z-index:10000; border-radius:8px;">
   <h2>Análise de Tarefas</h2>
   <button style="float:right;" onclick="fecharAnalise()">Fechar</button>
@@ -220,6 +211,7 @@ button {
 
 <script>
   let colunas = [];
+  let tarefas = [];
   let historico = [];
   let indexHistorico = -1;
   const MAX_HIST = 50;
@@ -229,9 +221,14 @@ button {
   // Função de toast
   function toast(msg) {
     const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
+    if (!t) {
+      const newT = document.createElement('div');
+      newT.id='toast';
+      document.body.appendChild(newT);
+    }
+    document.getElementById('toast').textContent=msg;
+    document.getElementById('toast').classList.add('show');
+    setTimeout(()=>{ document.getElementById('toast').classList.remove('show'); }, 3000);
   }
 
   // Carregar do localStorage
@@ -250,13 +247,12 @@ button {
     atualizarBotoesUndoRedo();
     salvarDadosLocal();
   }
-
   function carregarEstado() {
     if (indexHistorico >= 0 && indexHistorico < historico.length) {
       try {
         const snap = JSON.parse(historico[indexHistorico]);
         colunas = snap.colunas || [];
-        renderizarTarefas();
+        renderizarBoard();
         atualizarBotoesUndoRedo();
         atualizarDashboard();
       } catch {
@@ -264,21 +260,18 @@ button {
       }
     }
   }
-
   function undoEstado() {
     if (indexHistorico > 0) {
       indexHistorico--;
       carregarEstado();
     }
   }
-
   function redoEstado() {
     if (indexHistorico < historico.length - 1) {
       indexHistorico++;
       carregarEstado();
     }
   }
-
   function atualizarBotoesUndoRedo() {
     document.getElementById('btnUndo').disabled = indexHistorico <= 0;
     document.getElementById('btnRedo').disabled = indexHistorico >= historico.length -1;
@@ -296,12 +289,12 @@ button {
     document.body.classList.toggle('light', t==='light');
   }
 
-  // Persistência local
+  // Persistir dados
   function salvarDadosLocal() {
-    localStorage.setItem('tarefasDados', JSON.stringify({ colunas }));
+    localStorage.setItem('tarefasData', JSON.stringify({ colunas }));
   }
   function carregarDadosLocal() {
-    const dados = localStorage.getItem('tarefasDados');
+    const dados = localStorage.getItem('tarefasData');
     if (dados) {
       try {
         const obj = JSON.parse(dados);
@@ -312,24 +305,32 @@ button {
     }
   }
 
-  // Função para criar nova lista
+  // Adicionar coluna
   function adicionarColuna() {
-    const nome = prompt('Nome da lista:', 'Nova Lista');
+    const nome = prompt('Nome da coluna:', 'Nova Lista');
     if (!nome) return;
-    colunas.push({ id: Date.now(), nome, tarefas: [] });
+    const novaCol = {
+      id: Date.now(),
+      nome,
+      tarefas: []
+    };
+    colunas.push(novaCol);
     salvarEstado();
-    renderizarTarefas();
+    renderizarBoard();
   }
 
   // Criar nova tarefa
   function criarTarefa() {
-    const listaID = prompt('ID da lista onde criar a tarefa (deixe vazio para lista padrão):');
+    if (colunas.length===0) {
+      alert('Crie uma coluna primeiro.');
+      return;
+    }
+    const listaID = prompt('ID da lista (deixe vazio para a primeira):');
     let lista = null;
     if (listaID) {
-      lista = colunas.find(c => c.id == listaID);
+      lista = colunas.find(c=>c.id==listaID);
       if (!lista) { alert('Lista não encontrada'); return; }
     } else {
-      if(colunas.length===0){ alert('Nenhuma lista criada'); return; }
       lista = colunas[0];
     }
     const texto = prompt('Descrição da tarefa:', 'Nova tarefa');
@@ -344,219 +345,230 @@ button {
       comentarios: []
     });
     salvarEstado();
-    renderizarTarefas();
+    renderizarBoard();
   }
 
-  // Renderizar tarefas
-  function renderizarTarefas() {
-    const container = document.getElementById('tarefasContainer');
-    container.innerHTML = '';
-
+  // Renderizar board
+  function renderizarBoard() {
+    const container = document.getElementById('board');
+    container.innerHTML='';
     colunas.forEach(c => {
       const colDiv = document.createElement('div');
-      colDiv.className = 'coluna';
+      colDiv.className='coluna';
 
+      // Cabeçalho
+      const headerCol = document.createElement('div');
+      headerCol.style.display='flex'; headerCol.style.justifyContent='space-between'; alignItems='center';
       const tituloCol = document.createElement('h2');
       tituloCol.textContent = c.nome;
-      colDiv.appendChild(tituloCol);
+      const btnRenomear = document.createElement('button');
+      btnRenomear.textContent='✎';
+      btnRenomear.title='Renomear coluna';
+      btnRenomear.onclick= ()=> {
+        const novoNome = prompt('Novo nome:', c.nome);
+        if(novoNome) { c.nome=novoNome; salvarEstado(); renderizarBoard(); }
+      };
+      const btnRemover = document.createElement('button');
+      btnRemover.textContent='🗑️';
+      btnRemover.title='Remover coluna';
+      btnRemover.onclick= ()=> {
+        if(confirm('Remover coluna?')){
+          colunas = colunas.filter(cc=>cc.id!==c.id);
+          salvarEstado();
+          renderizarBoard();
+        }
+      };
+      headerCol.appendChild(tituloCol);
+      headerCol.appendChild(btnRenomear);
+      headerCol.appendChild(btnRemover);
+      colDiv.appendChild(headerCol);
 
-      c.tarefas.forEach((t, i) => {
+      // Botão adicionar tarefa
+      const btnAddTarefa = document.createElement('button');
+      btnAddTarefa.textContent='Adicionar Tarefa';
+      btnAddTarefa.onclick= ()=> {
+        const texto = prompt('Descrição da tarefa:', 'Nova tarefa');
+        if (!texto) return;
+        c.tarefas.push({
+          id: Date.now(),
+          texto,
+          prioridade: 'Baixo',
+          responsavel: '',
+          vencimento: '',
+          progresso: 0,
+          comentarios: []
+        });
+        salvarEstado();
+        renderizarBoard();
+      };
+      colDiv.appendChild(btnAddTarefa);
+
+      // Tarefas
+      c.tarefas.forEach((t,i) => {
         const card = document.createElement('div');
-        card.className = 'cartao';
+        card.className='tarefa';
+        card.draggable=true;
+        card.ondragstart= (e)=> {
+          e.dataTransfer.setData('text/plain', JSON.stringify({colID:c.id, tarefaID:t.id}));
+        };
+        card.ondragover= (e)=> { e.preventDefault(); };
+        card.ondrop= (e)=> {
+          e.preventDefault();
+          const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+          moverTarefa(data.colID, data.tarefaID, c.id);
+        };
 
         // Badge de prioridade
-        let prioClass = '';
+        let prioClass='';
         if(t.prioridade==='Alto') prioClass='prio-alto';
         if(t.prioridade==='Médio') prioClass='prio-medio';
         if(t.prioridade==='Baixo') prioClass='prio-baixo';
 
         const badge = document.createElement('div');
-        badge.className = 'prioridade-badge ' + prioClass;
+        badge.className='badge-pri '+prioClass;
         badge.textContent = t.prioridade;
+        card.appendChild(badge);
 
         // Título
-        const tituloTarefa = document.createElement('div');
-        tituloTarefa.className='titulo';
-        tituloTarefa.contentEditable=true;
-        tituloTarefa.textContent = t.texto;
-        tituloTarefa.onblur= ()=> {
-          t.texto = tituloTarefa.textContent;
+        const tituloDiv = document.createElement('div');
+        tituloDiv.className='titulo';
+        tituloDiv.contentEditable=true;
+        tituloDiv.textContent=t.texto;
+        tituloDiv.onblur= ()=> {
+          t.texto= tituloDiv.textContent;
           salvarEstado();
         };
+        card.appendChild(tituloDiv);
 
-        // Data vencimento
-        const venc = document.createElement('div');
-        venc.textContent = 'Vence: ' + (t.vencimento || '---');
-        if(t.vencimento && new Date(t.vencimento) < new Date()){
-          venc.style.color='red';
+        // Vencimento
+        const vencDiv = document.createElement('div');
+        vencDiv.textContent='Vence: '+(t.vencimento||'---');
+        if(t.vencimento && new Date(t.vencimento)<new Date()) {
+          vencDiv.style.color='red';
         }
+        vencDiv.onclick= ()=> {
+          const novo = prompt('Data (YYYY-MM-DD):', t.vencimento);
+          if(novo!==null) {
+            t.vencimento=novo;
+            salvarEstado();
+            renderizarBoard();
+          }
+        };
+        card.appendChild(vencDiv);
 
         // Responsável
         const respDiv = document.createElement('div');
-        respDiv.textContent = 'Responsável: ' + (t.responsavel || '---');
+        respDiv.textContent='Responsável: '+(t.responsavel||'---');
+        respDiv.onclick= ()=> {
+          const novo=prompt('Responsável:', t.responsavel);
+          if(novo!==null) {
+            t.responsavel=novo;
+            salvarEstado();
+            renderizarBoard();
+          }
+        };
+        card.appendChild(respDiv);
 
         // Progresso
         const progContainer = document.createElement('div');
         progContainer.className='progress-container';
         const progBar = document.createElement('div');
         progBar.className='progress-bar';
-        progBar.style.width= t.progresso + '%';
-
-        // Atualiza a barra de progresso
-        setTimeout(()=>{ progBar.style.width = t.progresso + '%'; }, 50);
-
+        setTimeout(()=>{ progBar.style.width = t.progresso + '%'; },50);
         progContainer.appendChild(progBar);
-
+        card.appendChild(progContainer);
         // Botões
-        const botoes = document.createElement('div');
-        botoes.className='botoes-acao';
+        const btns = document.createElement('div');
+        btns.className='botoes-acao';
 
         const btnProgresso = document.createElement('button');
-        btnProgresso.textContent='Progresso';
-        btnProgresso.title='Incrementar progresso em 10%';
+        btnProgresso.className='btnProgresso';
+        btnProgresso.textContent='Progress +10%';
         btnProgresso.onclick= ()=> {
-          t.progresso = Math.min(t.progresso + 10, 100);
+          t.progresso= Math.min(t.progresso+10, 100);
           salvarEstado();
-          renderizarTarefas();
+          renderizarBoard();
         };
-
         const btnPrioridade = document.createElement('button');
+        btnPrioridade.className='btnPrioridade';
         btnPrioridade.textContent='Prioridade';
-        btnPrioridade.title='Alterar prioridade';
         btnPrioridade.onclick= ()=> {
           if(t.prioridade==='Baixo') t.prioridade='Médio';
           else if(t.prioridade==='Médio') t.prioridade='Alto';
           else t.prioridade='Baixo';
           salvarEstado();
-          renderizarTarefas();
+          renderizarBoard();
         };
-
-        const btnResponsavel = document.createElement('button');
-        btnResponsavel.textContent='Responsável';
-        btnResponsavel.title='Alterar responsável';
-        btnResponsavel.onclick= ()=> {
-          const respNovo = prompt('Responsável:', t.responsavel);
-          if(respNovo!==null) {
-            t.responsavel=respNovo;
+        const btnEditar = document.createElement('button');
+        btnEditar.className='btnEditar';
+        btnEditar.textContent='✎';
+        btnEditar.title='Editar descrição';
+        btnEditar.onclick= ()=> {
+          const novoTexto=prompt('Editar descrição:', t.texto);
+          if(novoTexto!==null) {
+            t.texto=novoTexto;
             salvarEstado();
-            renderizarTarefas();
+            renderizarBoard();
           }
         };
-
-        const btnVencimento = document.createElement('button');
-        btnVencimento.textContent='Vencimento';
-        btnVencimento.title='Alterar data de vencimento';
-        btnVencimento.onclick= ()=> {
-          const dataNovo = prompt('Data (YYYY-MM-DD):', t.vencimento);
-          if(dataNovo!==null) {
-            t.vencimento = dataNovo;
-            salvarEstado();
-            renderizarTarefas();
-          }
-        };
-
         const btnComentarios = document.createElement('button');
-        btnComentarios.className='btnComentario';
         btnComentarios.textContent='Comentários';
-        btnComentarios.title='Ver/Add comentários';
-        btnComentarios.onclick= ()=> {
-          abrirComentarios(t);
-        };
-
+        btnComentarios.onclick= ()=> { abrirComentarios(t); };
         const btnExcluir = document.createElement('button');
         btnExcluir.className='btnExcluir';
-        btnExcluir.textContent='Excluir';
-        btnExcluir.title='Remover tarefa';
+        btnExcluir.textContent='🗑️';
         btnExcluir.onclick= ()=> {
-          if(confirm('Excluir tarefa?')){
+          if(confirm('Remover tarefa?')){
             c.tarefas.splice(i,1);
             salvarEstado();
-            renderizarTarefas();
+            renderizarBoard();
           }
         };
 
-        // Montar botões
-        botoes.appendChild(btnProgresso);
-        botoes.appendChild(btnPrioridade);
-        botoes.appendChild(btnResponsavel);
-        botoes.appendChild(btnVencimento);
-        botoes.appendChild(btnComentarios);
-        botoes.appendChild(btnExcluir);
+        [btnProgresso, btnPrioridade, btnEditar, btnComentarios, btnExcluir].forEach(b=>b && btns.appendChild(b));
+        card.appendChild(btns);
 
-        // Montar cartão
-        card.appendChild(badge);
-        card.appendChild(tituloTarefa);
-        card.appendChild(venc);
-        card.appendChild(respDiv);
-        card.appendChild(progContainer);
-        card.appendChild(botoes);
-        // Adicionar ao container
+        c.tarefas[i]=t; // assegura atualização
         colDiv.appendChild(card);
       });
-      // Adiciona a lista ao main
-      if(!document.querySelector(`h2:contains("${c.nome}")`)){
-        main.appendChild(colDiv);
-      }
+      container.appendChild(colDiv);
     });
-    // Atualiza alertas de tarefas atrasadas
     atualizarDashboard();
   }
 
-  // Criar nova tarefa
-  function criarTarefa() {
-    const listaID = prompt('ID da lista onde criar a tarefa (deixe vazio para lista padrão):');
-    let lista = null;
-    if (listaID) {
-      lista = colunas.find(c => c.id == listaID);
-      if (!lista) { alert('Lista não encontrada'); return; }
-    } else {
-      if(colunas.length===0){ alert('Nenhuma lista criada'); return; }
-      lista = colunas[0];
+  // Mover tarefa entre colunas
+  function moverTarefa(origColID, tarefaID, destColID) {
+    if (origColID==destColID) return;
+    const origem = colunas.find(c=>c.id==origColID);
+    const destino= colunas.find(c=>c.id==destColID);
+    if(!origem || !destino) return;
+    const tIndex= origem.tarefas.findIndex(t=>t.id==tarefaID);
+    if(tIndex===-1) return;
+    const t= origem.tarefas.splice(tIndex,1)[0];
+    destino.tarefas.push(t);
+    salvarEstado();
+    renderizarBoard();
+  }
+
+  // Função para criar nova coluna
+  function criarColuna() {
+    const nome=prompt('Nome da nova coluna:', 'Nova Lista');
+    if(!nome) return;
+    colunas.push({ id: Date.now(), nome, tarefas:[] });
+    salvarEstado();
+    renderizarBoard();
+  }
+
+  // Função para limpar tudo
+  function limparTudo() {
+    if(confirm('Deseja apagar tudo?')){
+      colunas=[];
+      salvarEstado();
+      renderizarBoard();
     }
-    const texto = prompt('Descrição da tarefa:', 'Nova tarefa');
-    if (!texto) return;
-    lista.tarefas.push({
-      id: Date.now(),
-      texto,
-      prioridade: 'Baixo',
-      responsavel: '',
-      vencimento: '',
-      progresso: 0,
-      comentarios: []
-    });
-    salvarEstado();
-    renderizarTarefas();
   }
 
-  // Comentários
-  function abrirComentarios(tarefa) {
-    tarefaAtualComentando = tarefa;
-    document.getElementById('comentariosList').innerHTML='';
-    (tarefa.comentarios || []).forEach(c => {
-      const div = document.createElement('div');
-      div.className='comentario';
-      div.innerHTML=`<b>${c.autor}</b> (${c.data}):<br/>${c.comentario}`;
-      document.getElementById('comentariosList').appendChild(div);
-    });
-    document.getElementById('novoComentario').value='';
-    document.getElementById('modalComentario').style.display='block';
-  }
-  function salvarComentario() {
-    const c = {
-      autor: prompt('Seu nome:', 'Usuário') || 'Anonimo',
-      comentario: document.getElementById('novoComentario').value,
-      data: new Date().toLocaleString()
-    };
-    tarefaAtualComentando.comentarios = tarefaAtualComentando.comentarios || [];
-    tarefaAtualComentando.comentarios.push(c);
-    salvarEstado();
-    abrirComentarios(tarefaAtualComentando);
-  }
-  function fecharComentario() {
-    document.getElementById('modalComentario').style.display='none';
-  }
-
-  // Mostrar painel de análise
+  // Painel de análise
   function mostrarAnalise() {
     document.getElementById('painelAnalise').style.display='block';
     gerarDashboard();
@@ -565,99 +577,124 @@ button {
     document.getElementById('painelAnalise').style.display='none';
   }
   function gerarDashboard() {
-    const dash = document.getElementById('dashboard');
+    const dash= document.getElementById('dashboard');
     dash.innerHTML='';
-    const total = colunas.reduce((ac, c) => ac + c.tarefas.length,0);
-    const concluidas = colunas.reduce((ac, c) => ac + c.tarefas.filter(t=>t.progresso>=100).length,0);
-    const atrasadas = colunas.reduce((ac, c) => ac + c.tarefas.filter(t => t.vencimento && new Date(t.vencimento) < new Date() && t.progresso<100).length,0);
-    const porPrioridade = { Alto:0, Medio:0, Baixo:0 };
-    const porResponsavel = {};
+    const total= colunas.reduce((a,c)=>a+c.tarefas.length,0);
+    const concluidas= colunas.reduce((a,c)=>a+c.tarefas.filter(t=>t.progresso>=100).length,0);
+    const atrasadas= colunas.reduce((a,c)=>a+c.tarefas.filter(t=>t.vencimento && new Date(t.vencimento)<new Date() && t.progresso<100).length,0);
+    const priCount={ Alto:0, Medio:0, Baixo:0 };
+    const respCount={};
     colunas.forEach(c => {
       c.tarefas.forEach(t => {
-        if(porPrioridade[t.prioridade]) porPrioridade[t.prioridade]++;
+        if(priCount[t.prioridade]) priCount[t.prioridade]++;
         if(t.responsavel) {
-          porResponsavel[t.responsavel] = (porResponsavel[t.responsavel]||0)+1;
+          respCount[t.responsavel]= (respCount[t.responsavel]||0)+1;
         }
       });
     });
     dash.innerHTML=`
-      <p>Total de tarefas: ${total}</p>
+      <p>Total: ${total}</p>
       <p>Concluídas: ${concluidas}</p>
       <p>Atrasadas: ${atrasadas}</p>
-      <h3>Por Prioridade</h3>
+      <h3>Prioridade</h3>
       <ul>
-        <li>Alto: ${porPrioridade.Alto || 0}</li>
-        <li>Médio: ${porPrioridade.Medio || 0}</li>
-        <li>Baixo: ${porPrioridade.Baixo || 0}</li>
+        <li>Alto: ${priCount.Alto ||0}</li>
+        <li>Médio: ${priCount.Medio ||0}</li>
+        <li>Baixo: ${priCount.Baixo ||0}</li>
       </ul>
-      <h3>Por Responsável</h3>
+      <h3>Responsáveis</h3>
       <ul>
-        ${Object.entries(porResponsavel).map(([resp,count]) => `<li>${resp}: ${count}</li>`).join('')}
+        ${Object.entries(respCount).map(([k,v])=>`<li>${k}: ${v}</li>`).join('')}
       </ul>
     `;
   }
 
-  // Limpar tudo
-  function limparTudo() {
-    if(confirm('Deseja apagar tudo?')){
-      colunas = [];
-      salvarEstado();
-      renderizarTarefas();
-    }
-  }
-
-  // Atualizar alertas de tarefas atrasadas
-  function atualizarDashboard() {
-    const atrasadas = [];
-    colunas.forEach(c => {
-      c.tarefas.forEach(t => {
-        if(t.vencimento && new Date(t.vencimento) < new Date() && t.progresso < 100) {
-          atrasadas.push(t);
-        }
-      });
+  // Abrir comentários
+  function abrirComentarios(tarefa) {
+    tarefaAtualComentando= tarefa;
+    const listDiv= document.getElementById('comentariosList');
+    listDiv.innerHTML='';
+    (tarefa.comentarios || []).forEach(c => {
+      const div= document.createElement('div');
+      div.className='comentario';
+      div.innerHTML=`<b>${c.autor}</b> (${c.data}):<br/>${c.comentario}`;
+      listDiv.appendChild(div);
     });
-    const alerta = document.getElementById('alertaAtrasadas');
-    if (atrasadas.length > 0) {
-      alerta.innerHTML = `Tarefas atrasadas: ${atrasadas.length}. Clique aqui para ver detalhes.`;
-      alerta.classList.add('show');
-    } else {
-      alerta.classList.remove('show');
-    }
+    document.getElementById('novoComentario').value='';
+    document.getElementById('modalComentario').style.display='block';
+  }
+  function salvarComentario() {
+    const c= {
+      autor: prompt('Seu nome:', 'Usuário') || 'Anonimo',
+      comentario: document.getElementById('novoComentario').value,
+      data: new Date().toLocaleString()
+    };
+    tarefaAtualComentando.comentarios= tarefaAtualComentando.comentarios || [];
+    tarefaAtualComentando.comentarios.push(c);
+    salvarEstado();
+    abrirComentarios(tarefaAtualComentando);
+  }
+  function fecharComentario() {
+    document.getElementById('modalComentario').style.display='none';
   }
 
-  // Evento click na notificação
-  document.getElementById('alertaAtrasadas').onclick = () => {
-    const atrasadas = [];
-    colunas.forEach(c => {
-      c.tarefas.forEach(t => {
-        if(t.vencimento && new Date(t.vencimento) < new Date() && t.progresso < 100) {
-          atrasadas.push(t);
-        }
-      });
-    });
-    alert('Tarefas atrasadas:\n' + atrasadas.map(t => t.texto).join('\n'));
-  }
-
-  // Buscar tarefas
+  // Buscar
   function filtrarConteudo() {
-    const termo = document.getElementById('searchInput').value.toLowerCase();
-    document.querySelectorAll('.cartao').forEach(c => {
-      const texto = c.querySelector('.titulo').textContent.toLowerCase();
-      c.style.display = texto.includes(termo) ? '' : 'none';
+    const termo= document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('.tarefa').forEach(t => {
+      const texto= t.querySelector('.titulo').textContent.toLowerCase();
+      t.style.display= texto.includes(termo)? '' :'none';
     });
   }
 
-  // Inicializar app
+  // Inicializar
   function init() {
     carregarDadosLocal();
     aplicarTema();
-    renderizarTarefas();
-    setInterval(atualizarDashboard, 60000); // verifica a cada minuto
-    atualizarDashboard(); // primeira verificação
+    renderizarBoard();
+    setInterval(atualizarDashboard,60000);
+    atualizarDashboard();
   }
 
-  // Eventos globais
-  window.onload=init;
+  // Atualizar tarefas atrasadas
+  function atualizarDashboard() {
+    const atrasadas= [];
+    colunas.forEach(c => {
+      c.tarefas.forEach(t => {
+        if(t.vencimento && new Date(t.vencimento)<new Date() && t.progresso<100) {
+          atrasadas.push(t);
+        }
+      });
+    });
+    const alerta= document.getElementById('alertaAtrasadas');
+    if(atrasadas.length>0) {
+      alerta.innerHTML= `Tarefas atrasadas: ${atrasadas.length}. Clique aqui`;
+      alerta.className='show';
+    } else {
+      alerta.className='';
+    }
+  }
+
+  // Evento clique alerta
+  document.getElementById('alertaAtrasadas').onclick= ()=> {
+    const atrasadas= [];
+    colunas.forEach(c => {
+      c.tarefas.forEach(t => {
+        if(t.vencimento && new Date(t.vencimento)<new Date() && t.progresso<100) {
+          atrasadas.push(t);
+        }
+      });
+    });
+    alert('Tarefas atrasadas:\n'+atrasadas.map(t=>t.texto).join('\n'));
+  };
+
+  window.onload= ()=> {
+    init();
+    document.getElementById('btnAddCol').onclick= adicionarColuna;
+    document.querySelector('button[onclick="criarTarefa()"]').onclick= criarTarefa;
+    document.querySelector('button[onclick="limparTudo()"]').onclick= limparTudo;
+    document.querySelector('button[onclick="mostrarAnalise()"]').onclick= mostrarAnalise;
+  };
 </script>
 
 </body>

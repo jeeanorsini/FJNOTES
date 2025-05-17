@@ -1,39 +1,43 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FJNOTES - Gerenciador Visual (ClickUp-like)</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FJNOTES - Gerenciador Visual (ClickUp-like)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <header>
-        <h1>FJNOTES</h1>
-        <input type="search" id="searchInput" placeholder="Buscar tarefas...">
-        <div class="toolbar">
-            <button id="btnUndo" title="Desfazer (Ctrl+Z)">↩️ Undo</button>
-            <button id="btnRedo" title="Refazer (Ctrl+Y)">↪️ Redo</button>
-            <button id="btnAddCol" class="primary">+ Coluna</button>
-        </div>
-    </header>
+<header>
+  <h1>FJNOTES</h1>
+  <input type="search" id="searchInput" placeholder="Buscar tarefas...">
+  <div class="toolbar">
+    <button id="btnUndo" title="Desfazer (Ctrl+Z)">↩️ Undo</button>
+    <button id="btnRedo" title="Refazer (Ctrl+Y)">↪️ Redo</button>
+    <button id="btnAddCol" class="primary">+ Coluna</button>
+  </div>
+</header>
 
-    <main id="board">
-        </main>
+<main id="board">
+  <!-- Colunas serão renderizadas aqui via JS -->
+</main>
 
-    <div class="toast" id="toast"></div>
+<div class="toast" id="toast"></div>
 
-    <div class="modal" id="commentModal">
-        <div class="modal-content">
-            <div id="commentsList"></div>
-            <textarea id="newComment" placeholder="Adicione um comentário..." style="width: 100%; margin: 1rem 0;"></textarea>
-            <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
-                <button id="cancelComment">Cancelar</button>
-                <button class="primary" id="saveComment">Salvar</button>
-            </div>
-        </div>
+<!-- Modal de Comentários -->
+<div class="modal" id="commentModal">
+  <div class="modal-content">
+    <!-- O cabeçalho será injetado via JS -->
+    <div id="commentsList"></div>
+    <textarea id="newComment" placeholder="Adicione um comentário..." style="width: 100%; margin: 1rem 0;"></textarea>
+    <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+      <button id="cancelComment">Cancelar</button>
+      <button class="primary" id="saveComment">Salvar</button>
     </div>
+  </div>
+</div>
 
-    <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>

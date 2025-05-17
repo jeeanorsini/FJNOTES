@@ -2,534 +2,866 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>FJNOTES - Gerenciador Visual</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FJNOTES Pro Avançado</title>
+<!-- Styles copiados e ajustados para melhor visual e funcionalidade -->
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+  /* Reset e base */
+  * { box-sizing: border-box; }
   body {
-    font-family: Arial, sans-serif;
-    background-color: #121212; /* fundo escuro */
-    color: #fff;
-    margin: 0;
-    padding: 20px;
+    margin: 0; padding: 0;
+    font-family: 'Montserrat', sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
-  h1 {
-    text-align: center;
-    color: #FFCC00; /* amarelo marca */
-    margin-bottom: 20px;
+  body.dark {
+    background-color: #121212; color: #FFC107;
   }
-  #controles {
+  body.light {
+    background-color: #fdf6e3; color: #b58900;
+  }
+
+  header {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 1rem 2rem;
+    background-color: inherit;
+    border-bottom: 2px solid currentColor;
+  }
+  h1 {
+    margin: 0; font-weight: 700; font-size: 1.8rem;
+    user-select: text;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
   }
   button {
-    padding: 8px 12px;
-    font-size: 14px;
-    border: none;
-    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    border: 2px solid currentColor;
+    background: transparent;
+    color: inherit;
     cursor: pointer;
-    background-color: #000; /* fundo preto */
-    color: #FFCC00; /* amarelo marca */
-    transition: background-color 0.2s, color 0.2s;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: background-color 0.25s ease, color 0.25s ease;
+    user-select: none;
   }
   button:hover {
-    background-color: #222;
+    background-color: currentColor;
+    color: var(--button-hover-text, #121212);
   }
-  /* Botões específicos para destaque */
-  .highlight {
-    background-color: #FFCC00;
-    color: #000;
-  }
-
-  #botoesMapa {
-    margin-bottom: 20px;
-    text-align: center;
-  }
-
-  /* Quadro de colunas */
-  #telaPrincipal {
+  main {
     display: flex;
-    gap: 10px;
+    padding: 1rem 2rem;
+    gap: 1rem;
+    height: calc(100vh - 80px);
+    box-sizing: border-box;
+  }
+  /* Colunas */
+  #telaPrincipal {
+    flex: 1;
+    display: flex;
     overflow-x: auto;
+    gap: 1rem;
+    background-color: var(--panel-bg);
+    border-radius: 12px;
+    padding: 1rem;
+    max-height: 100%;
+  }
+  body.dark #telaPrincipal {
+    --panel-bg: #1e1e1e;
+  }
+  body.light #telaPrincipal {
+    --panel-bg: #eee8d5;
+    color: #b58900;
   }
   .coluna {
-    background: #222;
-    padding: 10px;
-    min-width: 200px;
-    border-radius: 4px;
-    border: 1px solid #FFCC00;
-  }
-  .coluna h3 {
-    margin-top: 0;
-    color: #FFCC00;
-  }
-  .cartao {
-    background: #333;
-    padding: 8px;
-    margin-bottom: 8px;
-    border-radius: 4px;
-    cursor: grab;
+    flex-shrink: 0;
+    width: 300px;
+    background-color: var(--col-bg);
+    border-radius: 12px;
+    border: 2px solid currentColor;
+    box-shadow: 0 0 12px #ffc10744 inset;
+    padding: 1rem;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
   }
-  /* Mapa mental com SVG */
+  body.dark .coluna {
+    --col-bg: #2a2a2a;
+  }
+  body.light .coluna {
+    --col-bg: #f7f1db;
+  }
+  .coluna h2 {
+    margin: 0 0 1rem 0;
+    font-weight: 900;
+    letter-spacing: 1px;
+    font-size: 1.3rem;
+  }
+  .btn-primary {
+    background-color: #ffc107;
+    color: #121212;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 900;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+  .btn-primary:hover {
+    background-color: #ffca28cc;
+  }
+  /* Cartões */
+  .cartao {
+    flex-shrink: 0;
+    background-color: var(--card-bg);
+    color: inherit;
+    border-radius: 12px;
+    box-shadow: 0 0 10px #ffc10755;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+    cursor: grab;
+    border: 1.5px solid currentColor;
+    user-select: text;
+    display: flex;
+    flex-direction: column;
+  }
+  body.dark .cartao {
+    --card-bg: #333;
+  }
+  body.light .cartao {
+    --card-bg: #fff8dc;
+  }
+  .cartao textarea {
+    all: unset;
+    width: 100%;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 40px;
+    resize: vertical;
+    color: inherit;
+  }
+  /* Mapa Mental */
   #mapaContainer {
     position: relative;
-    width: 100%;
-    height: 600px;
-    border: 2px solid #FFCC00;
-    margin-top: 20px;
-    display: none;
-    background-color: #1e1e1e;
+    background-color: var(--map-bg);
+    border-radius: 12px;
+    border: 2px solid currentColor;
+    flex: 1;
+    overflow: hidden;
+    max-height: 100%;
+    cursor: grab;
+  }
+  body.dark #mapaContainer {
+    --map-bg: #1e1e1e;
+  }
+  body.light #mapaContainer {
+    --map-bg: #fff8dc;
+    color: #b58900;
   }
   #svgConexoes {
     position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    stroke-width: 2.5;
+    fill: none;
     z-index: 0;
   }
   #mapaMental {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 10px;
-    z-index: 1;
+    position: relative;
+    min-height: 100%;
+    width: 100%;
+    overflow: visible;
+    touch-action: none;
   }
   .topico {
-    background: #FFCC00;
-    border: 2px solid #000;
-    padding: 10px;
-    border-radius: 6px;
-    margin: 10px;
-    min-width: 120px;
-    text-align: center;
-    cursor: grab;
     position: absolute;
-    box-shadow: 0 0 10px rgba(0,0,0,0.7);
+    background-color: var(--topico-bg);
+    border-radius: 12px;
+    padding: 12px 16px;
+    min-width: 160px;
+    max-width: 250px;
+    border: 2px solid currentColor;
+    box-shadow: 0 0 10px #ffc10755;
+    font-weight: 700;
+    font-size: 1.1rem;
+    word-break: break-word;
+    cursor: grab;
+    user-select: text;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  body.dark .topico {
+    --topico-bg: #222;
+  }
+  body.light .topico {
+    --topico-bg: #ffe082;
+  }
+  .topico:hover {
+    box-shadow: 0 0 25px #ffca2855;
+    transform: scale(1.05);
+    z-index: 100;
   }
   .topico input {
-    width: 80%;
-    margin-bottom: 5px;
-    border: 1px solid #000;
-    border-radius: 4px;
-    padding: 4px;
+    all: unset;
+    width: 100%;
+    font-weight: 700;
+    font-size: 1rem;
+    background-color: transparent;
+    color: inherit;
+    outline: none;
+    font-family: 'Montserrat', sans-serif;
+    text-align: center;
   }
-  .topico button {
-    margin-top: 5px;
-    background-color: #000;
-    color: #FFCC00;
-    border: none;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-  }
-  .topico button:hover {
-    background-color: #222;
-  }
-  /* Botões de conexão */
+  /* Botões de conexão e ações */
   .conexaoBtn {
-    margin-top: 5px;
-    font-size: 12px;
-    background-color: #000;
-    color: #FFCC00;
-    border: none;
-    padding: 4px 8px;
-    border-radius: 4px;
+    margin-top: 6px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    background: transparent;
     cursor: pointer;
   }
-  .conexaoBtn:hover {
-    background-color: #222;
-  }
-  /* Seleção múltipla */
+  /* Seleção */
   .selecionado {
-    outline: 3px solid #FFCC00;
-    box-shadow: 0 0 10px #FFCC00;
+    outline: 3px solid #fff176;
+    box-shadow: 0 0 20px #fff176;
+    z-index: 101 !important;
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background-color: #ffc107dd;
+    color: #121212;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 0 15px #ffc107aa;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 9999;
+  }
+  #toast.show {
+    opacity: 1;
+    pointer-events: auto;
   }
 </style>
-<title>FJNOTES - Gerenciador Visual</title>
 </head>
-<body>
+<body class="dark">
+<header>
+  <h1>FJNOTES Pro</h1>
+  <input type="search" id="searchInput" placeholder="Buscar cartões ou tópicos..." oninput="filtrarConteudo()" />
+  <div class="controls">
+    <button onclick="undoEstado()" id="btnUndo" disabled title="Desfazer (Ctrl+Z)">↶ Undo</button>
+    <button onclick="redoEstado()" id="btnRedo" disabled title="Refazer (Ctrl+Y)">↷ Redo</button>
+    <button onclick="toggleTema()" title="Alternar tema claro/escuro">🌓 Tema</button>
+  </div>
+</header>
+<main>
+  <div id="telaPrincipal" aria-label="Quadro de colunas" role="region"></div>
+  <div id="mapaContainer" aria-label="Mapa mental" style="display:none;" role="region">
+    <svg id="svgConexoes" preserveAspectRatio="none"></svg>
+    <div id="mapaMental"></div>
+  </div>
+</main>
 
-<h1>FJNOTES - Gerenciador Visual</h1>
-
-<div id="controles">
+<div id="botoesBarras" role="toolbar" aria-label="Ferramentas" style="margin:1rem; display:flex; gap:0.5rem; justify-content:center;">
   <button onclick="adicionarColuna()">Adicionar Coluna</button>
   <button onclick="mostrarTabuleiro()">Mostrar Quadro</button>
   <button onclick="mostrarMapaMental()">Mostrar Mapa Mental</button>
   <button onclick="exportarDados()">Exportar Dados</button>
   <button onclick="mostrarImportar()">Importar Dados</button>
-  <button onclick="selecionarParaConectar()">Selecionar Tópicos para Conexão</button>
+  <button onclick="selecionarParaConectar()">Selecionar Tópicos</button>
   <button onclick="conectarSelecionados()">Conectar Selecionados</button>
   <button onclick="limparSelecao()">Limpar Seleção</button>
-</div>
-
-<div id="botoesMapa">
-  <button onclick="criarTopico()">Adicionar Topico</button>
+  <button onclick="criarTopico()">Adicionar Tópico</button>
   <button onclick="limparMapa()">Limpar Mapa</button>
 </div>
-
-<!-- Área do quadro de colunas -->
-<div id="telaPrincipal"></div>
-
-<!-- Área do mapa mental -->
-<div id="mapaContainer">
-  <svg id="svgConexoes"></svg>
-  <div id="mapaMental"></div>
-</div>
-
-<!-- Input oculto para importação -->
 <input type="file" id="arquivoImportar" style="display:none" onchange="importarDados(event)" />
 
+<div id="toast"></div>
+
 <script>
+  // Variáveis principais
   let colunas = [];
   let mapaMental = [];
   let modoMapa = false;
-  let selecao = []; // IDs dos tópicos selecionados
+  let selecao = [];
 
-  // Carregar do LocalStorage
-  const dadosSalvos = localStorage.getItem('dadosGerenciador');
-  if (dadosSalvos) {
-    const dados = JSON.parse(dadosSalvos);
-    colunas = dados.colunas || [];
-    mapaMental = dados.mapaMental || [];
+  let historico = [];
+  let indexHistorico = -1;
+  const MAX_HIST = 50;
+
+  // Função toast
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
   }
 
-  function salvarDados() {
-    localStorage.setItem('dadosGerenciador', JSON.stringify({ colunas, mapaMental }));
-  }
-
-  // =================== Gerenciamento de Colunas ====================
-  function adicionarColuna() {
-    const nome = prompt('Nome da nova coluna:', 'Nova coluna');
-    if (nome) {
-      const novaColuna = { id: Date.now(), nome, cartoes: [] };
-      colunas.push(novaColuna);
-      salvarDados();
-      renderizarColunas();
+  // Gerenciamento de histórico (Undo/Redo)
+  function salvarEstado() {
+    if(indexHistorico < historico.length -1) {
+      historico.splice(indexHistorico+1);
     }
+    const snapshot = JSON.stringify({colunas, mapaMental});
+    historico.push(snapshot);
+    if(historico.length > MAX_HIST) {
+      historico.shift();
+    } else {
+      indexHistorico++;
+    }
+    atualizarBotoesUndoRedo();
+    salvarDadosLocal();
+  }
+  function desfazer() {
+    if(indexHistorico > 0) {
+      indexHistorico--;
+      carregarEstadoHistorico();
+    }
+  }
+  function refazer() {
+    if(indexHistorico < historico.length-1) {
+      indexHistorico++;
+      carregarEstadoHistorico();
+    }
+  }
+  function carregarEstadoHistorico() {
+    try {
+      const snap = historico[indexHistorico];
+      if(snap) {
+        const estado = JSON.parse(snap);
+        colunas = estado.colunas || [];
+        mapaMental = estado.mapaMental || [];
+        selecao = [];
+        renderizarColunas();
+        renderizarMapaMental();
+        salvarDadosLocal();
+        toast('Ações restauradas');
+        atualizarBotoesUndoRedo();
+      }
+    } catch {
+      toast('Erro ao restaurar estado');
+    }
+  }
+  function atualizarBotoesUndoRedo() {
+    document.getElementById('btnUndo').disabled = indexHistorico <= 0;
+    document.getElementById('btnRedo').disabled = indexHistorico >= historico.length-1 || indexHistorico < 0;
+  }
+  function undoEstado() { desfazer(); }
+  function redoEstado() { refazer(); }
+
+  // Tema
+  function toggleTema() {
+    document.body.classList.toggle('dark');
+    document.body.classList.toggle('light');
+    localStorage.setItem('tema', document.body.classList.contains('dark') ? 'dark' : 'light');
+  }
+  function aplicarTemaSalvo() {
+    const tema = localStorage.getItem('tema') || 'dark';
+    document.body.classList.toggle('dark', tema==='dark');
+    document.body.classList.toggle('light', tema==='light');
+  }
+
+  // Persistência local
+  function salvarDadosLocal() {
+    localStorage.setItem('dadosGerenciador', JSON.stringify({colunas, mapaMental}));
+  }
+  function carregarDadosLocal() {
+    const dados = localStorage.getItem('dadosGerenciador');
+    if(dados) {
+      try {
+        const obj = JSON.parse(dados);
+        colunas = obj.colunas || [];
+        mapaMental = obj.mapaMental || [];
+      } catch {
+        colunas = [];
+        mapaMental = [];
+      }
+    }
+  }
+  carregarDadosLocal();
+  aplicarTemaSalvo();
+
+  // ==== CRUD colunas ====
+  function adicionarColuna() {
+    let nome = prompt('Nome da nova coluna:', 'Nova coluna');
+    if(!nome) return;
+    colunas.push({ id: Date.now(), nome, cartoes: [] });
+    salvarEstado();
+    renderizarColunas();
   }
 
   function renderizarColunas() {
     const container = document.getElementById('telaPrincipal');
     container.innerHTML = '';
     colunas.forEach(col => {
-      const divCol = document.createElement('div');
-      divCol.className = 'coluna';
-      divCol.setAttribute('data-id', col.id);
-
-      const titulo = document.createElement('h3');
-      titulo.textContent = col.nome;
-
+      const colDiv = document.createElement('div');
+      colDiv.className = 'coluna';
+      colDiv.setAttribute('data-id', col.id);
+      // Título
+      const h2 = document.createElement('h2');
+      h2.textContent = col.nome;
+      colDiv.appendChild(h2);
+      // Botão para adicionar cartão
       const btnAddCard = document.createElement('button');
+      btnAddCard.className = 'btn-primary';
       btnAddCard.textContent = 'Adicionar Cartão';
       btnAddCard.onclick = () => {
         const texto = prompt('Conteúdo do cartão:', '');
-        if (texto) {
-          col.cartoes.push({ id: Date.now(), texto });
-          salvarDados();
-          renderizarColunas();
-        }
+        if(!texto) return;
+        col.cartoes.push({ id: Date.now(), texto, tags: [] });
+        salvarEstado();
+        renderizarColunas();
       };
-
-      divCol.appendChild(titulo);
-      divCol.appendChild(btnAddCard);
-
+      colDiv.appendChild(btnAddCard);
       // Cartões
-      const cardsDiv = document.createElement('div');
-      col.cartoes.forEach((cartao, index) => {
-        const cardEl = document.createElement('div');
-        cardEl.className = 'cartao';
-        cardEl.draggable = true;
-        cardEl.setAttribute('data-colid', col.id);
-        cardEl.setAttribute('data-index', index);
-        cardEl.ondragstart = (e) => {
-          e.dataTransfer.setData('cartao', JSON.stringify({ colId: col.id, index }));
+      col.cartoes.forEach((cartao, i) => {
+        const cartaoDiv = document.createElement('div');
+        cartaoDiv.className = 'cartao';
+        cartaoDiv.setAttribute('data-colid', col.id);
+        cartaoDiv.setAttribute('data-index', i);
+        cartaoDiv.draggable = true;
+        cartaoDiv.ondragstart = e => {
+          e.dataTransfer.setData('cartao', JSON.stringify({ colId: col.id, index: i }));
         };
-        // Edição do cartão
-        cardEl.onclick = () => {
-          const novoTexto = prompt('Editar cartão:', cartao.texto);
-          if (novoTexto !== null) {
-            col.cartoes[index].texto = novoTexto;
-            salvarDados();
+
+        // Texto
+        const ta = document.createElement('textarea');
+        ta.value = cartao.texto;
+        ta.oninput = () => {
+          cartao.texto = ta.value;
+          salvarEstado();
+        };
+        cartaoDiv.appendChild(ta);
+
+        // Tags
+        const tagsContainer = document.createElement('div');
+        tagsContainer.className = 'tag-list';
+        (cartao.tags || []).forEach(t => {
+          const spanTag = document.createElement('span');
+          spanTag.className = 'tag';
+          spanTag.textContent = t;
+          spanTag.title = 'Clique para remover tag';
+          spanTag.onclick = () => {
+            cartao.tags = cartao.tags.filter(tag => tag !== t);
+            salvarEstado();
+            renderizarColunas();
+            toast(`Tag "${t}" removida`);
+          };
+          tagsContainer.appendChild(spanTag);
+        });
+        cartaoDiv.appendChild(tagsContainer);
+        // Botão add tag
+        const btnAddTag = document.createElement('button');
+        btnAddTag.textContent = '+Tag';
+        btnAddTag.title = 'Adicionar tag';
+        btnAddTag.onclick = e => {
+          e.stopPropagation();
+          const novaTag = prompt('Nome da tag:');
+          if(novaTag && !cartao.tags.includes(novaTag.trim())) {
+            cartao.tags.push(novaTag.trim());
+            salvarEstado();
+            renderizarColunas();
+            toast(`Tag "${novaTag.trim()}" adicionada`);
+          }
+        };
+        cartaoDiv.appendChild(btnAddTag);
+
+        // Botão excluir cartão
+        const btnExcluir = document.createElement('button');
+        btnExcluir.textContent = '×';
+        btnExcluir.title = 'Excluir cartão';
+        btnExcluir.onclick = e => {
+          e.stopPropagation();
+          if(confirm('Excluir este cartão?')) {
+            col.cartoes.splice(i,1);
+            salvarEstado();
             renderizarColunas();
           }
         };
-        // Texto
-        const spanText = document.createElement('span');
-        spanText.textContent = cartao.texto;
-        cardEl.appendChild(spanText);
+        cartaoDiv.appendChild(btnExcluir);
 
-        // Excluir cartão
-        const btnExcluir = document.createElement('button');
-        btnExcluir.textContent = 'X';
-        btnExcluir.onclick = () => {
-          col.cartoes.splice(index, 1);
-          salvarDados();
-          renderizarColunas();
+        // Drag & drop
+        colDiv.ondragover = e => e.preventDefault();
+        colDiv.ondrop = e => {
+          const data = JSON.parse(e.dataTransfer.getData('cartao'));
+          const origCol = colunas.find(c => c.id === data.colId);
+          if(origCol) {
+            const cartao = origCol.cartoes.splice(data.index,1)[0];
+            col.cartoes.push(cartao);
+            salvarEstado();
+            renderizarColunas();
+          }
         };
-        cardEl.appendChild(btnExcluir);
 
-        cardsDiv.appendChild(cardEl);
+        // Adicionar ao container
+        container.appendChild(colDiv);
+        colDiv.appendChild(cartaoDiv);
       });
-
-      // Drag-and-drop para mover entre colunas
-      divCol.ondragover = (e) => e.preventDefault();
-      divCol.ondrop = (e) => {
-        const data = JSON.parse(e.dataTransfer.getData('cartao'));
-        const colOrigem = colunas.find(c => c.id === data.colId);
-        if (colOrigem) {
-          const cartao = colOrigem.cartoes.splice(data.index, 1)[0];
-          col.cartoes.push(cartao);
-          salvarDados();
-          renderizarColunas();
-        }
-      };
-
-      divCol.appendChild(cardsDiv);
-      container.appendChild(divCol);
     });
   }
 
-  // =================== Gerenciamento do Mapa Mental ====================
+  // ==== Mapa mental ====
+  // Cria novo tópico
   function criarTopico() {
     const texto = prompt('Texto do tópico:', 'Novo tópico');
-    if (texto) {
-      const id = Date.now();
-      mapaMental.push({ id, texto, conexoes: [], pos: {x: Math.random()*500+50, y: Math.random()*400+50} });
-      salvarDados();
-      renderizarMapaMental();
-    }
+    if(!texto) return;
+    const novoTopo = {
+      id: Date.now(),
+      texto,
+      conexoes: [],
+      pos: { x: 200 + Math.random()*300, y: 150 + Math.random()*250 },
+      tags: []
+    };
+    mapaMental.push(novoTopo);
+    salvarEstado();
+    renderizarMapaMental();
   }
 
+  // Limpa mapa
   function limparMapa() {
-    if (confirm('Deseja limpar todo o mapa mental?')) {
+    if(confirm('Deseja limpar o mapa mental?')){
       mapaMental = [];
-      salvarDados();
+      salvarEstado();
       renderizarMapaMental();
     }
   }
 
+  // Variáveis para drag
+  let dragTopo = null;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  // Renderiza mapa mental
   function renderizarMapaMental() {
     const container = document.getElementById('mapaMental');
     const svg = document.getElementById('svgConexoes');
-    svg.innerHTML = ''; // limpar conexões
     container.innerHTML = '';
+    svg.innerHTML = '';
 
-    // Desenhar tópicos
+    // Renderiza tópicos
     mapaMental.forEach(tp => {
-      const div = document.createElement('div');
-      div.className = 'topico';
-      div.setAttribute('data-id', tp.id);
-      div.style.left = tp.pos.x + 'px';
-      div.style.top = tp.pos.y + 'px';
+      const el = document.createElement('div');
+      el.className = 'topico';
+      el.setAttribute('data-id', tp.id);
+      el.style.left = tp.pos.x + 'px';
+      el.style.top = tp.pos.y + 'px';
+      el.style.transform = `scale(${zoomLevel})`;
+      if(selecao.includes(tp.id)) el.classList.add('selecionado');
 
-      // Destaque se selecionado
-      if (selecao.includes(tp.id)) {
-        div.classList.add('selecionado');
-      }
-
-      // Para arrastar o tópico
-      div.draggable = true;
-      div.ondragstart = (e) => {
-        e.dataTransfer.setData('topico', tp.id);
-      };
-      // Para reposicionar ao soltar
-      div.ondragend = (e) => {
-        const id = tp.id;
-        tp.pos.x = e.pageX - 50;
-        tp.pos.y = e.pageY - 20;
-        salvarDados();
-        renderizarMapaMental();
-      };
-
-      // Evento para editar texto direto
+      // Texto editável
       const input = document.createElement('input');
-      input.type = 'text';
       input.value = tp.texto;
-      input.onchange = () => {
+      input.oninput = () => {
         tp.texto = input.value;
-        salvarDados();
-        renderizarMapaMental();
+        salvarEstado();
       };
-      div.appendChild(input);
+      el.appendChild(input);
 
-      // Botões para conexão
+      // Tags
+      (tp.tags || []).forEach(t => {
+        const span = document.createElement('span');
+        span.className = 'tag';
+        span.textContent = t;
+        span.title = 'Clique para remover tag';
+        span.onclick = () => {
+          tp.tags = tp.tags.filter(tag => tag !== t);
+          salvarEstado();
+          renderizarMapaMental();
+        };
+        el.appendChild(span);
+      });
+
+      // Botão add tag
+      const btnAddTag = document.createElement('button');
+      btnAddTag.textContent = '+Tag';
+      btnAddTag.onclick = e => {
+        e.stopPropagation();
+        const tNome = prompt('Nome da tag:');
+        if(tNome && !tp.tags.includes(tNome.trim())) {
+          tp.tags = tp.tags || [];
+          tp.tags.push(tNome.trim());
+          salvarEstado();
+          renderizarMapaMental();
+        }
+      };
+      el.appendChild(btnAddTag);
+
+      // Botão conectar (selecionar)
       const btnConectar = document.createElement('button');
-      btnConectar.textContent = 'Conectar';
+      btnConectar.textContent = selecao.includes(tp.id) ? 'Selecionado' : 'Selecionar';
       btnConectar.className = 'conexaoBtn';
       btnConectar.onclick = () => {
-        if (!selecao.includes(tp.id)) {
+        if(!selecao.includes(tp.id)){
           selecao.push(tp.id);
         } else {
-          alert('Já selecionado.');
+          // apenas para visual, pode tirar
         }
         renderizarMapaMental();
       };
-      div.appendChild(btnConectar);
+      el.appendChild(btnConectar);
 
-      // Botão para remover conexão
+      // Botão remover conexões
       const btnRemCon = document.createElement('button');
-      btnRemCon.textContent = 'Remover Conexão';
+      btnRemCon.textContent = 'Remover Conexões';
       btnRemCon.className = 'conexaoBtn';
       btnRemCon.onclick = () => {
-        if (selecao.length >= 2) {
-          // Remove conexão entre os selecionados
-          for (let i=0; i<selecao.length; i++) {
-            const t1 = mapaMental.find(t => t.id === selecao[i]);
-            for (let j=0; j<selecao.length; j++) {
-              if (i !== j && t1) {
-                t1.conexoes = t1.conexoes.filter(c => c !== selecao[j]);
-              }
+        if(selecao.length >= 2) {
+          selecao.forEach(id => {
+            const t = mapaMental.find(t => t.id===id);
+            if(t) {
+              t.conexoes = t.conexoes.filter(c => !selecao.includes(c));
             }
-          }
-          alert('Conexões removidas entre os tópicos selecionados.');
-          limparSelecao();
-          salvarDados();
+          });
+          salvarEstado();
           renderizarMapaMental();
         } else {
-          alert('Selecione pelo menos dois tópicos.');
+          toast('Selecione pelo menos dois tópicos');
         }
       };
-      div.appendChild(btnRemCon);
+      el.appendChild(btnRemCon);
 
       // Botão excluir tópico
       const btnExcluir = document.createElement('button');
-      btnExcluir.textContent = 'Excluir Tópico';
+      btnExcluir.textContent = 'Excluir';
       btnExcluir.onclick = () => {
-        if (confirm('Excluir este tópico e suas conexões?')) {
-          // Remove conexões apontando para ele
+        if(confirm('Excluir tópico e conexões?')){
+          // remove conexões
           mapaMental.forEach(t => {
             t.conexoes = t.conexoes.filter(c => c !== tp.id);
           });
-          // Remove o tópico
+          // remove tópico
           mapaMental = mapaMental.filter(t => t.id !== tp.id);
-          // Remove da seleção
           selecao = selecao.filter(id => id !== tp.id);
-          salvarDados();
+          salvarEstado();
           renderizarMapaMental();
         }
       };
-      div.appendChild(btnExcluir);
+      el.appendChild(btnExcluir);
 
-      container.appendChild(div);
+      // Drag & drop tópicos
+      el.onmousedown = e => {
+        dragTopo = tp;
+        const rect = document.getElementById('mapaContainer').getBoundingClientRect();
+        offsetX = e.clientX - rect.left - tp.pos.x;
+        offsetY = e.clientY - rect.top - tp.pos.y;
+        e.stopPropagation();
+        e.preventDefault();
+      };
+
+      container.appendChild(el);
     });
 
-    // Desenhar conexões com curvas
+    // Desenhar conexões
     mapaMental.forEach(tp => {
-      const fromX = tp.pos.x + 70; // centro do tópico
-      const fromY = tp.pos.y + 20;
+      const fromX = tp.pos.x + 80;
+      const fromY = tp.pos.y + 25;
       tp.conexoes.forEach(destId => {
-        const dest = mapaMental.find(t => t.id === destId);
-        if (dest) {
-          const toX = dest.pos.x + 70;
-          const toY = dest.pos.y + 20;
-          // Curva quadrática
+        const dest = mapaMental.find(t => t.id===destId);
+        if(dest){
+          const toX = dest.pos.x + 80;
+          const toY = dest.pos.y + 25;
           const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-          const controlX = (fromX + toX) / 2;
-          const controlY = Math.min(fromY, toY) - 50;
-          const d = `M ${fromX} ${fromY} Q ${controlX} ${controlY} ${toX} ${toY}`;
-          path.setAttribute('d', d);
-          path.setAttribute('stroke', '#FFCC00');
-          path.setAttribute('fill', 'none');
-          path.setAttribute('stroke-width', '2');
+          const midX = (fromX + toX)/2;
+          const midY = (fromY + toY)/2 + (fromY < toY ? -50 : 50);
+          path.setAttribute('d', `M${fromX},${fromY} L${midX},${midY} L${toX},${toY}`);
+          path.setAttribute('stroke','#FFC107');
+          path.setAttribute('stroke-width',2.5);
           svg.appendChild(path);
         }
       });
     });
   }
 
-  // =================== Funções de seleção múltipla ====================
-  function selecionarParaConectar() {
-    alert('Clique nos tópicos desejados para selecionar. Depois clique em "Conectar Selecionados".');
-  }
+  // Eventos globais para arraste tópicos
+  document.body.onmousemove = e => {
+    if(dragTopo){
+      const rect = document.getElementById('mapaContainer').getBoundingClientRect();
+      let x = (e.clientX - rect.left - offsetX);
+      let y = (e.clientY - rect.top - offsetY);
+      // Limites
+      x = Math.max(0, Math.min(rect.width - 160, x));
+      y = Math.max(0, Math.min(rect.height - 50, y));
+      dragTopo.pos.x = x;
+      dragTopo.pos.y = y;
+      salvarEstado();
+      renderizarMapaMental();
+    }
+  };
+  document.body.onmouseup = () => {
+    dragTopo = null;
+  };
 
+  // Zoom e pan
+  let zoomLevel = 1;
+  let panX = 0;
+  let panY = 0;
+  let isPanning = false;
+  let startPan = {x:0, y:0};
+  let panStart = {x:0, y:0};
+
+  document.getElementById('mapaContainer').addEventListener('wheel', e => {
+    e.preventDefault();
+    zoomLevel += -e.deltaY * 0.0015;
+    zoomLevel = Math.min(Math.max(0.5, zoomLevel), 3);
+    renderizarMapaMental();
+  }, {passive: false});
+
+  document.getElementById('mapaContainer').addEventListener('mousedown', e => {
+    if(e.target.id === 'mapaContainer' || e.target.id==='svgConexoes'){
+      isPanning = true;
+      startPan.x = e.clientX;
+      startPan.y = e.clientY;
+      panStart.x = panX;
+      panStart.y = panY;
+      document.getElementById('mapaContainer').style.cursor='grabbing';
+    }
+  });
+  document.body.addEventListener('mouseup', () => {
+    isPanning = false;
+    document.getElementById('mapaContainer').style.cursor='grab';
+  });
+  document.body.addEventListener('mousemove', e => {
+    if(isPanning){
+      panX = panStart.x + (e.clientX - startPan.x);
+      panY = panStart.y + (e.clientY - startPan.y);
+      document.getElementById('mapaMental').style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
+    }
+  });
+
+  // Seleção múltipla
   function limparSelecao() {
     selecao = [];
     renderizarMapaMental();
+    toast('Seleção limpa');
+  }
+
+  function selecionarParaConectar() {
+    toast('Clique nos tópicos para selecionar, depois Conectar');
   }
 
   function conectarSelecionados() {
-    if (selecao.length >= 2) {
-      // Conecta todos aos demais
-      for (let i=0; i<selecao.length; i++) {
-        const t1 = mapaMental.find(t => t.id === selecao[i]);
-        for (let j=0; j<selecao.length; j++) {
-          if (i !== j && t1) {
-            if (!t1.conexoes.includes(selecao[j]))
-              t1.conexoes.push(selecao[j]);
-          }
-        }
-      }
-      alert('Conexões feitas entre tópicos selecionados.');
-      limparSelecao();
-      salvarDados();
-      renderizarMapaMental();
-    } else {
-      alert('Selecione pelo menos dois tópicos.');
+    if(selecao.length<2){
+      toast('Selecione pelo menos dois tópicos');
+      return;
     }
+    selecao.forEach(id1 => {
+      const t1 = mapaMental.find(t => t.id===id1);
+      selecao.forEach(id2 => {
+        if(id1!==id2 && !t1.conexoes.includes(id2)){
+          t1.conexoes.push(id2);
+        }
+      });
+    });
+    salvarEstado();
+    limparSelecao();
+    renderizarMapaMental();
   }
 
-  // =================== Exportar e Importar ====================
+  // Exportar/Importar
   function exportarDados() {
-    const dados = {
-      colunas,
-      mapaMental
-    };
+    const dados = { colunas, mapaMental };
     const jsonStr = JSON.stringify(dados, null, 2);
-    const blob = new Blob([jsonStr], {type: 'application/json'});
+    const blob = new Blob([jsonStr], {type:'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'dados-gerenciador.json';
+    a.download = 'fjnotes-dados.json';
     a.click();
     URL.revokeObjectURL(url);
+    toast('Dados exportados');
   }
 
   function mostrarImportar() {
     document.getElementById('arquivoImportar').click();
   }
 
-  function importarDados(event) {
-    const file = event.target.files[0];
+  function importarDados(e) {
+    const file = e.target.files[0];
+    if(!file) return;
     const reader = new FileReader();
     reader.onload = () => {
       try {
         const dados = JSON.parse(reader.result);
         colunas = dados.colunas || [];
         mapaMental = dados.mapaMental || [];
-        salvarDados();
+        salvarEstado();
         renderizarColunas();
         renderizarMapaMental();
         mostrarTabuleiro();
-      } catch (e) {
-        alert('Erro ao importar arquivo.');
+        toast('Dados importados');
+      } catch {
+        toast('Erro ao importar');
       }
     };
     reader.readAsText(file);
   }
 
-  // =================== Inicialização ====================
+  // Buscar
+  function filtrarConteudo() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    // Colunas e cartões
+    colunas.forEach(c => {
+      const colDiv = [...document.querySelectorAll('#telaPrincipal > div')].find(d => +d.getAttribute('data-id')===c.id);
+      if(!colDiv) return;
+      const colMatch = c.nome.toLowerCase().includes(q);
+      let hasCartoesVisiveis = false;
+      colDiv.querySelectorAll('.cartao').forEach((el, i) => {
+        const cart = c.cartoes[i];
+        const txt = cart.texto.toLowerCase();
+        const tags = (cart.tags||[]).join(',').toLowerCase();
+        const visivel = txt.includes(q) || colMatch || tags.includes(q);
+        el.style.display = visivel ? '' : 'none';
+        if(visivel) hasCartoesVisiveis = true;
+      });
+      colDiv.style.display = (colMatch || hasCartoesVisiveis) ? '' : 'none';
+    });
+    // Mapas
+    mapaMental.forEach(t => {
+      const el = [...document.querySelectorAll('#mapaMental > div')].find(d=>+d.getAttribute('data-id')===t.id);
+      if(!el) return;
+      const txt = t.texto.toLowerCase();
+      const tags = (t.tags||[]).join(',').toLowerCase();
+      const visivel = txt.includes(q) || tags.includes(q);
+      el.style.display = visivel ? '' : 'none';
+    });
+  }
+
+  // Mostrar modos
   function mostrarTabuleiro() {
-    document.getElementById('telaPrincipal').style.display = 'flex';
-    document.getElementById('mapaContainer').style.display = 'none';
     modoMapa = false;
+    document.getElementById('telaPrincipal').style.display='flex';
+    document.getElementById('mapaContainer').style.display='none';
   }
   function mostrarMapaMental() {
-    document.getElementById('telaPrincipal').style.display = 'none';
-    document.getElementById('mapaContainer').style.display = 'block';
+    modoMapa = true;
+    document.getElementById('telaPrincipal').style.display='none';
+    document.getElementById('mapaContainer').style.display='block';
     renderizarMapaMental();
   }
 
-  // inicia com o modo quadro
+  // Iniciar
+  renderizarColunas();
   mostrarTabuleiro();
+  salvarEstado();
 
 </script>
 </body>

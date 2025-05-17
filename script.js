@@ -149,7 +149,7 @@ function createTaskElement(task, columnId) {
             dueDate.classList.add('overdue');
             dueDate.textContent = `Venceu em ${due.toLocaleDateString()}`;
         } else {
-            dueDate.textContent = `Venceu em ${due.toLocaleDateString()}`;
+            dueDate.textContent = `Vence em ${due.toLocaleDateString()}`;
         }
     } else {
         dueDate.textContent = 'Sem data';
@@ -451,31 +451,3 @@ function deleteTask(taskId, columnId) {
     column.tasks.splice(taskIndex, 1);
 
     saveState();
-    renderBoard();
-    showToast(`Tarefa "${task.title}" removida!`);
-}
-
-// Undo/Redo
-function undo() {
-    if (state.historyIndex <= 0) return;
-
-    state.historyIndex--;
-    state.columns = JSON.parse(state.history[state.historyIndex]);
-    localStorage.setItem('fjnotes-state', JSON.stringify(state));
-    renderBoard();
-    updateUndoRedoButtons();
-}
-
-function redo() {
-    if (state.historyIndex >= state.history.length - 1) return;
-
-    state.historyIndex++;
-    state.columns = JSON.parse(state.history[state.historyIndex]);
-    localStorage.setItem('fjnotes-state', JSON.stringify(state));
-    renderBoard();
-    updateUndoRedoButtons();
-}
-
-function updateUndoRedoButtons() {
-    DOM.btnUndo.disabled = state.historyIndex <= 0;
-    DOM.btnRedo.disabled = state.historyIndex >= state.

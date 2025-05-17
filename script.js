@@ -149,7 +149,7 @@ function createTaskElement(task, columnId) {
             dueDate.classList.add('overdue');
             dueDate.textContent = `Venceu em ${due.toLocaleDateString()}`;
         } else {
-            dueDate.textContent = `Vence em ${due.toLocaleDateString()}`;
+            dueDate.textContent = `Venceu em ${due.toLocaleDateString()}`;
         }
     } else {
         dueDate.textContent = 'Sem data';
@@ -478,4 +478,4 @@ function redo() {
 
 function updateUndoRedoButtons() {
     DOM.btnUndo.disabled = state.historyIndex <= 0;
-    DOM.btnRedo.disabled = state.historyIndex >= state.history.length -
+    DOM.btnRedo.disabled = state.historyIndex >= state.
